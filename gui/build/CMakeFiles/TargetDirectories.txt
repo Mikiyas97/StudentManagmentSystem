@@ -1,0 +1,5 @@
+C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/CMakeFiles/studentManagementSystem.dir
+C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/CMakeFiles/edit_cache.dir
+C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/CMakeFiles/rebuild_cache.dir
+C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/CMakeFiles/studentManagementSystem_autogen_timestamp_deps.dir
+C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/CMakeFiles/studentManagementSystem_autogen.dir

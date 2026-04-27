@@ -1,0 +1,8 @@
+# ninja log v6
+18	140	7990193069442974	studentManagementSystem_autogen/timestamp	c326284a1b76499e
+18	140	7990193069442974	C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/studentManagementSystem_autogen/mocs_compilation.cpp	c326284a1b76499e
+18	140	7990193069442974	studentManagementSystem_autogen/mocs_compilation.cpp	c326284a1b76499e
+194	248	7990189924411924	CMakeFiles/studentManagementSystem.dir/studentManagementSystem_autogen/mocs_compilation.cpp.obj	b56429a5b5602275
+118	3112	7990192441524186	CMakeFiles/studentManagementSystem.dir/main.cpp.obj	62bd7534bf556919
+3112	3256	7990192471458023	studentManagementSystem.exe	855ef70219703b60
+18	140	7990193069442974	C:/Users/HP/Desktop/assignments/StudentManagmentSystem/gui/build/studentManagementSystem_autogen/timestamp	c326284a1b76499e
