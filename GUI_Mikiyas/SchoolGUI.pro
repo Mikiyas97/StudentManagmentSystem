@@ -10,12 +10,17 @@ SOURCES += main.cpp \
            managers/grademanager.cpp \
            managers/coursemanager.cpp \
            managers/reportmanager.cpp \
+           managers/usermanager.cpp \
+           managers/enrollmentmanager.cpp \
            pages/studentpage.cpp \
            pages/studentformdialog.cpp \
            pages/studentdetaildialog.cpp \
            pages/gradepage.cpp \
            pages/coursepage.cpp \
-           pages/reportpage.cpp
+           pages/reportpage.cpp \
+           pages/teacherpage.cpp \
+           pages/enrollmentpage.cpp \
+           pages/profilepage.cpp
 
 HEADERS += mainwindow.h \
            logindialog.h \
@@ -23,9 +28,14 @@ HEADERS += mainwindow.h \
            managers/grademanager.h \
            managers/coursemanager.h \
            managers/reportmanager.h \
+           managers/usermanager.h \
+           managers/enrollmentmanager.h \
            pages/studentpage.h \
            pages/studentformdialog.h \
            pages/studentdetaildialog.h \
            pages/gradepage.h \
            pages/coursepage.h \
-           pages/reportpage.h
+           pages/reportpage.h \
+           pages/teacherpage.h \
+           pages/enrollmentpage.h \
+           pages/profilepage.h

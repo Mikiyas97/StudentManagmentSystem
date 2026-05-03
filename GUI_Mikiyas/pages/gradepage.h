@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QLabel>
 #include "../managers/grademanager.h"
 
 class GradePage : public QWidget {
@@ -26,8 +27,10 @@ private:
     QLineEdit *courseEdit;
     QDoubleSpinBox *scoreSpin;
     QSpinBox *filterSpin;
+    QLabel *gpaLabel;
     QString userRole;
     int userStudentId;
+    QString teacherCourse;
 };
 
 #endif // GRADEPAGE_H

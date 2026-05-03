@@ -1,4 +1,5 @@
 #include "studentmanager.h"
+#include "usermanager.h"
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
@@ -37,7 +38,17 @@ bool StudentManager::addStudent(const Student &s) {
     query.bindValue(":gname", s.guardianName);
     query.bindValue(":gphone", s.guardianContact);
     query.bindValue(":status", s.status);
-    return query.exec();
+    if (query.exec()) {
+        UserManager um;
+        User u;
+        u.username = QString::number(s.id);
+        u.password = "pass" + QString::number(s.id);
+        u.role = "student";
+        u.relatedId = s.id;
+        um.addUser(u);
+        return true;
+    }
+    return false;
 }
 
 bool StudentManager::updateStudent(const Student &s) {
@@ -161,6 +172,21 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
     QVector<Student> list;
     QSqlQuery query(sql);
     while (query.next()) list.push_back(parseStudent(query));
+    return list;
+}
+
+QVector<Student> StudentManager::getStudentsByCourse(const QString &courseCode) const {
+    QVector<Student> list;
+    QSqlQuery query;
+    query.prepare("SELECT s.* FROM students s "
+                  "JOIN enrollments e ON s.id = e.studentId "
+                  "WHERE e.courseCode = ?");
+    query.addBindValue(courseCode);
+    if (query.exec()) {
+        while (query.next()) {
+            list.push_back(parseStudent(query));
+        }
+    }
     return list;
 }
 

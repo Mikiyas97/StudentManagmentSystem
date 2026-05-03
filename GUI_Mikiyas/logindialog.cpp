@@ -1,4 +1,5 @@
 #include "logindialog.h"
+#include "managers/usermanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -71,7 +72,7 @@ LoginDialog::LoginDialog(QWidget *parent)
     cardLayout->addWidget(errorLabel);
 
     // Hint
-    QLabel *hintLabel = new QLabel("Admin: admin / admin123\nStudent: <ID> / pass<ID>");
+    QLabel *hintLabel = new QLabel("Admin: admin / admin123\nTeacher/Student: <ID> / pass<ID>");
     hintLabel->setAlignment(Qt::AlignCenter);
     hintLabel->setStyleSheet("color: #444; font-size: 11px; margin-top: 15px; background: transparent;");
 
@@ -95,30 +96,17 @@ void LoginDialog::onLogin() {
         return;
     }
 
-    // Admin check
-    if (username == "admin" && password == "admin123") {
-        role = "admin";
-        accept();
+    UserManager um;
+    User u = um.getUserByUsername(username);
+
+    if (u.username.isEmpty() || u.password != password) {
+        errorLabel->setText("Invalid credentials!");
         return;
     }
 
-    // Student check: username is numeric ID, password is "pass" + ID
-    bool isDigits = true;
-    for (int i = 0; i < username.length(); ++i) {
-        if (!username[i].isDigit()) { isDigits = false; break; }
-    }
-
-    if (isDigits && !username.isEmpty()) {
-        QString expectedPass = "pass" + username;
-        if (password == expectedPass) {
-            role = "student";
-            studentId = username.toInt();
-            accept();
-            return;
-        }
-    }
-
-    errorLabel->setText("Invalid credentials!");
+    role = u.role;
+    studentId = u.relatedId;
+    accept();
 }
 
 QString LoginDialog::getRole() const { return role; }

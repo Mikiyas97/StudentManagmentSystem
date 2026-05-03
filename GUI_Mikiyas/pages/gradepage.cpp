@@ -1,4 +1,5 @@
 #include "gradepage.h"
+#include "../managers/usermanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -10,6 +11,14 @@
 GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
     : QWidget(parent), userRole(role), userStudentId(studentId)
 {
+    if (userRole == "teacher") {
+        UserManager um;
+        Teacher t = um.getTeacherById(userStudentId);
+        if (t.id != -1) {
+            teacherCourse = t.courseCode;
+        }
+    }
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(15);
     layout->setContentsMargins(25, 20, 25, 20);
@@ -21,8 +30,8 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
     layout->addWidget(title);
     layout->addWidget(subtitle);
 
-    // Add Grade form (admin only)
-    if (userRole == "admin") {
+    // Add Grade form (admin/teacher only)
+    if (userRole == "admin" || userRole == "teacher") {
         QGroupBox *addGroup = new QGroupBox("Add New Grade");
         QHBoxLayout *addLayout = new QHBoxLayout(addGroup);
         addLayout->setSpacing(10);
@@ -35,8 +44,12 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
 
         addLayout->addWidget(new QLabel("Course:"));
         courseEdit = new QLineEdit;
-        courseEdit->setPlaceholderText("Course name");
+        courseEdit->setPlaceholderText("Course code");
         courseEdit->setFixedWidth(150);
+        if (userRole == "teacher") {
+            courseEdit->setText(teacherCourse);
+            courseEdit->setEnabled(false);
+        }
         addLayout->addWidget(courseEdit);
 
         addLayout->addWidget(new QLabel("Score:"));
@@ -55,8 +68,8 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
         connect(addBtn, &QPushButton::clicked, this, &GradePage::onAdd);
     }
 
-    // Filter bar (admin only)
-    if (userRole == "admin") {
+    // Filter bar (admin/teacher only)
+    if (userRole == "admin" || userRole == "teacher") {
         QGroupBox *filterGroup = new QGroupBox("Filter");
         QHBoxLayout *filterLayout = new QHBoxLayout(filterGroup);
         filterLayout->setSpacing(10);
@@ -86,9 +99,9 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
 
     // Table
     table = new QTableWidget;
-    table->setColumnCount(3);
+    table->setColumnCount(4);
     QStringList headers;
-    headers << "Student ID" << "Course" << "Score";
+    headers << "Student ID" << "Course" << "Score" << "Grade";
     table->setHorizontalHeaderLabels(headers);
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -97,9 +110,17 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
     table->verticalHeader()->setVisible(false);
     layout->addWidget(table, 1);
 
+    gpaLabel = new QLabel;
+    gpaLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: #e94560; padding: 10px;");
+    gpaLabel->setAlignment(Qt::AlignRight);
+    layout->addWidget(gpaLabel);
+    if (userRole != "student") gpaLabel->hide();
+
     // Initial load
     if (userRole == "student") {
         refreshTable(userStudentId);
+    } else if (userRole == "teacher") {
+        refreshTable(-1); // Will be filtered in refreshTable by teacherCourse
     } else {
         refreshTable(-1);
     }
@@ -107,12 +128,23 @@ GradePage::GradePage(const QString &role, int studentId, QWidget *parent)
 
 void GradePage::refreshTable(int filterId) {
     manager = GradeManager();
-    QVector<Grade> grades = manager.getGrades(filterId);
+    QVector<Grade> grades = manager.getGrades(filterId, userRole == "teacher" ? teacherCourse : "");
     table->setRowCount(grades.size());
+    
+    float totalPoints = 0;
     for (int i = 0; i < grades.size(); ++i) {
         table->setItem(i, 0, new QTableWidgetItem(QString::number(grades[i].studentId)));
         table->setItem(i, 1, new QTableWidgetItem(grades[i].course));
         table->setItem(i, 2, new QTableWidgetItem(QString::number(grades[i].score, 'f', 1)));
+        table->setItem(i, 3, new QTableWidgetItem(grades[i].letterGrade));
+        totalPoints += grades[i].gradePoint;
+    }
+
+    if (userRole == "student" && grades.size() > 0) {
+        float gpa = totalPoints / grades.size();
+        gpaLabel->setText("Cumulative GPA: " + QString::number(gpa, 'f', 2));
+    } else {
+        gpaLabel->setText("");
     }
 }
 
@@ -124,8 +156,8 @@ void GradePage::onAdd() {
     }
     manager.addGrade(sidSpin->value(), course, scoreSpin->value());
     QMessageBox::information(this, "Success", "Grade recorded!");
-    courseEdit->clear();
-    refreshTable(-1);
+    if (userRole != "teacher") courseEdit->clear();
+    refreshTable(filterSpin ? (filterSpin->value() == 0 ? -1 : filterSpin->value()) : -1);
 }
 
 void GradePage::onFilter() {

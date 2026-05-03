@@ -3,9 +3,15 @@
 #include "pages/gradepage.h"
 #include "pages/coursepage.h"
 #include "pages/reportpage.h"
+#include "pages/teacherpage.h"
+#include "pages/enrollmentpage.h"
+#include "pages/profilepage.h"
+#include "managers/usermanager.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QApplication>
+#include <QInputDialog>
+#include <QMessageBox>
 
 MainWindow::MainWindow(const QString &role, int studentId, QWidget *parent)
     : QMainWindow(parent), userRole(role), userStudentId(studentId), activePage(-1)
@@ -57,12 +63,19 @@ void MainWindow::setupUI() {
 
     // Nav buttons based on role
     if (userRole == "admin") {
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Students"), 0));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Grades"), 1));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 1));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Courses"), 2));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Reports"), 3));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8B  Enrollments"), 3));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Grades"), 4));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Reports"), 5));
+    } else if (userRole == "teacher") {
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  My Profile"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  My Students"), 1));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Grades"), 2));
     } else {
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  My Grades"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  My Profile"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  My Grades"), 1));
     }
 
     sideLayout->addStretch();
@@ -70,13 +83,34 @@ void MainWindow::setupUI() {
     // Role info at bottom of sidebar
     roleLabel = new QLabel;
     QString roleText = "  Role: " + userRole;
-    if (userRole == "student") roleText += "\n  ID: " + QString::number(userStudentId);
+    if (userRole == "student" || userRole == "teacher") roleText += "\n  ID: " + QString::number(userStudentId);
     roleLabel->setText(roleText);
     roleLabel->setStyleSheet(
         "color: #a0a0b0; font-size: 12px; padding: 15px;"
         "background: transparent; border-top: 1px solid #1f4068;"
     );
     sideLayout->addWidget(roleLabel);
+
+    if (userRole != "admin") {
+        QPushButton *changePassBtn = new QPushButton(QString::fromUtf8("  \xF0\x9F\x94\x92  Change Pass"));
+        changePassBtn->setObjectName("navButton");
+        changePassBtn->setCursor(Qt::PointingHandCursor);
+        changePassBtn->setStyleSheet(
+            "QPushButton { color: #3498db; text-align: left; padding: 6px 20px;"
+            "border: none; background: transparent; font-size: 13px; }"
+            "QPushButton:hover { background-color: #162447; }"
+        );
+        connect(changePassBtn, &QPushButton::clicked, this, [this]() {
+            bool ok;
+            QString newPass = QInputDialog::getText(this, "Change Password", "Enter new password:", QLineEdit::Password, "", &ok);
+            if (ok && !newPass.isEmpty()) {
+                UserManager um;
+                um.changePassword(QString::number(userStudentId), newPass);
+                QMessageBox::information(this, "Success", "Password changed successfully.");
+            }
+        });
+        sideLayout->addWidget(changePassBtn);
+    }
 
     // Logout button
     QPushButton *logoutBtn = new QPushButton(QString::fromUtf8("  \xF0\x9F\x9A\xAA  Logout"));
@@ -88,7 +122,8 @@ void MainWindow::setupUI() {
         "QPushButton:hover { background-color: #2c1a1a; }"
     );
     connect(logoutBtn, &QPushButton::clicked, this, [this]() {
-        qApp->quit();
+        this->setProperty("logoutRequested", true);
+        this->close();
     });
     sideLayout->addWidget(logoutBtn);
 
@@ -99,12 +134,19 @@ void MainWindow::setupUI() {
     stack->setObjectName("contentArea");
 
     if (userRole == "admin") {
-        stack->addWidget(new StudentPage);        // 0
-        stack->addWidget(new GradePage("admin"));  // 1
+        stack->addWidget(new TeacherPage);         // 0
+        stack->addWidget(new StudentPage("admin"));// 1
         stack->addWidget(new CoursePage);          // 2
-        stack->addWidget(new ReportPage);          // 3
+        stack->addWidget(new EnrollmentPage);      // 3
+        stack->addWidget(new GradePage("admin"));  // 4
+        stack->addWidget(new ReportPage);          // 5
+    } else if (userRole == "teacher") {
+        stack->addWidget(new ProfilePage("teacher", userStudentId)); // 0
+        stack->addWidget(new StudentPage("teacher", userStudentId)); // 1
+        stack->addWidget(new GradePage("teacher", userStudentId));   // 2
     } else {
-        stack->addWidget(new GradePage("student", userStudentId));     // 0
+        stack->addWidget(new ProfilePage("student", userStudentId)); // 0
+        stack->addWidget(new GradePage("student", userStudentId));   // 1
     }
 
     mainLayout->addWidget(stack, 1);

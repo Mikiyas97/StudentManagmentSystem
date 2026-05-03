@@ -11,7 +11,7 @@
 class StudentPage : public QWidget {
     Q_OBJECT
 public:
-    explicit StudentPage(QWidget *parent = nullptr);
+    explicit StudentPage(const QString &role = "admin", int id = -1, QWidget *parent = nullptr);
 
 private slots:
     void onAddStudent();
@@ -35,6 +35,8 @@ private:
     QComboBox *sortCombo;
     QWidget *bulkBar;
     QLabel *selectionLabel;
+    QString userRole;
+    QString teacherCourse;
 
     void editStudentById(int id);
     QVector<int> getCheckedIds() const;

@@ -35,6 +35,7 @@ public:
     // Query
     QVector<Student> getStudents() const;
     Student getStudentById(int id) const;
+    QVector<Student> getStudentsByCourse(const QString &courseCode) const;
 
     // Advanced search & filter (combined)
     QVector<Student> filter(const QString &nameOrId,

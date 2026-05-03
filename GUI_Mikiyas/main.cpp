@@ -16,6 +16,20 @@ bool setupDatabase() {
     }
     
     QSqlQuery query;
+    // Create users table
+    query.exec("CREATE TABLE IF NOT EXISTS users ("
+               "username TEXT PRIMARY KEY, "
+               "password TEXT, "
+               "role TEXT, "
+               "relatedId INTEGER)");
+               
+    // Insert default admin if not exists
+    QSqlQuery checkAdmin("SELECT * FROM users WHERE username = 'admin'");
+    if (!checkAdmin.next()) {
+        query.exec("INSERT INTO users (username, password, role, relatedId) "
+                   "VALUES ('admin', 'admin123', 'admin', -1)");
+    }
+
     // Create students table
     query.exec("CREATE TABLE IF NOT EXISTS students ("
                "id INTEGER PRIMARY KEY, "
@@ -30,6 +44,19 @@ bool setupDatabase() {
                "guardianContact TEXT, "
                "status TEXT)");
                
+    // Create teachers table
+    QSqlQuery checkT("PRAGMA table_info(teachers)");
+    bool hasCC = false;
+    while(checkT.next()) if(checkT.value(1).toString() == "courseCode") hasCC = true;
+    if(!hasCC) query.exec("DROP TABLE IF EXISTS teachers");
+
+    query.exec("CREATE TABLE IF NOT EXISTS teachers ("
+               "id INTEGER PRIMARY KEY, "
+               "fullName TEXT, "
+               "courseCode TEXT, "
+               "phone TEXT, "
+               "email TEXT)");
+
     // Create courses table
     query.exec("CREATE TABLE IF NOT EXISTS courses ("
                "code TEXT PRIMARY KEY, "
@@ -37,6 +64,12 @@ bool setupDatabase() {
                "credits INTEGER, "
                "department TEXT)");
                
+    // Create enrollments table
+    query.exec("CREATE TABLE IF NOT EXISTS enrollments ("
+               "studentId INTEGER, "
+               "courseCode TEXT, "
+               "PRIMARY KEY(studentId, courseCode))");
+
     // Create grades table
     query.exec("CREATE TABLE IF NOT EXISTS grades ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -44,6 +77,7 @@ bool setupDatabase() {
                "courseCode TEXT, "
                "score REAL, "
                "grade TEXT, "
+               "gradePoint REAL, "
                "remarks TEXT)");
                
     return true;
@@ -163,15 +197,22 @@ int main(int argc, char *argv[]) {
         "QInputDialog { background-color: #16213e; }"
     );
 
-    // --- Show login dialog ---
-    LoginDialog loginDlg;
-    if (loginDlg.exec() != QDialog::Accepted) {
-        return 0;
-    }
+    bool logoutRequested = false;
+    do {
+        logoutRequested = false;
+        LoginDialog loginDlg;
+        if (loginDlg.exec() != QDialog::Accepted) {
+            return 0;
+        }
 
-    // --- Show main window ---
-    MainWindow w(loginDlg.getRole(), loginDlg.getStudentId());
-    w.show();
+        MainWindow w(loginDlg.getRole(), loginDlg.getStudentId());
+        w.show();
+        app.exec();
 
-    return app.exec();
+        if (w.property("logoutRequested").toBool()) {
+            logoutRequested = true;
+        }
+    } while (logoutRequested);
+
+    return 0;
 }

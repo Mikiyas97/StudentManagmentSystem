@@ -1,6 +1,7 @@
 #include "studentpage.h"
 #include "studentformdialog.h"
 #include "studentdetaildialog.h"
+#include "../managers/usermanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -11,8 +12,16 @@
 #include <QInputDialog>
 #include <QCheckBox>
 
-StudentPage::StudentPage(QWidget *parent) : QWidget(parent)
+StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget(parent), userRole(role)
 {
+    if (userRole == "teacher") {
+        UserManager um;
+        Teacher t = um.getTeacherById(id);
+        if (t.id != -1) {
+            teacherCourse = t.courseCode;
+        }
+    }
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(12);
     layout->setContentsMargins(25, 20, 25, 20);
@@ -32,6 +41,7 @@ StudentPage::StudentPage(QWidget *parent) : QWidget(parent)
     QPushButton *addBtn = new QPushButton("+ Add Student");
     addBtn->setCursor(Qt::PointingHandCursor);
     topBar->addWidget(addBtn);
+    if (userRole != "admin") addBtn->setVisible(false);
     topBar->addStretch();
 
     // Sort combo
@@ -193,11 +203,15 @@ void StudentPage::refreshTable() {
     classFilterCombo->blockSignals(false);
 
     // Get filtered data
-    QVector<Student> students = manager.filter(
-        searchEdit->text().trimmed(),
-        classFilterCombo->currentText(),
-        statusFilterCombo->currentText()
-    );
+    QVector<Student> students;
+    if (userRole == "teacher") {
+        students = manager.getStudentsByCourse(teacherCourse);
+    } else {
+        students = manager.filter(searchEdit->text().trimmed(),
+                                  classFilterCombo->currentText(),
+                                  statusFilterCombo->currentText()
+        );
+    }
 
     table->setRowCount(students.size());
     for (int i = 0; i < students.size(); ++i) {
@@ -272,8 +286,10 @@ void StudentPage::refreshTable() {
         });
 
         actLayout->addWidget(viewBtn);
-        actLayout->addWidget(editBtn);
-        actLayout->addWidget(delBtn);
+        if (userRole == "admin") {
+            actLayout->addWidget(editBtn);
+            actLayout->addWidget(delBtn);
+        }
         table->setCellWidget(i, 5, actWidget);
 
         table->setRowHeight(i, 38);
