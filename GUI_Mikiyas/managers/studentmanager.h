@@ -7,15 +7,15 @@
 struct Student {
     int id;
     QString fullName;
-    int age;
-    QString gender;          // Male, Female, Other
-    QString className;       // Class / Department
+    int grade_id;
+    QString gradeName;
+    int section_id;
+    QString sectionName;
+    int stream_id;
+    QString streamName;
     QString phone;
     QString email;
-    QString address;
-    QString guardianName;
-    QString guardianContact;
-    QString status;          // Active, Inactive, Graduated
+    QString status;
 };
 
 class StudentManager {

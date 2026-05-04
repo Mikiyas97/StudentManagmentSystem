@@ -7,12 +7,11 @@
 GradeManager::GradeManager() {
 }
 
-bool GradeManager::addGrade(int studentId, const QString &course, float score) {
+bool GradeManager::addGrade(int enrollmentId, float score) {
     QSqlQuery query;
-    query.prepare("INSERT INTO grades (studentId, courseCode, score, grade, gradePoint, remarks) "
-                  "VALUES (:sid, :course, :score, :grade, :gp, :remarks)");
-    query.bindValue(":sid", studentId);
-    query.bindValue(":course", course);
+    query.prepare("INSERT INTO grades (enrollmentId, score, grade, gradePoint, remarks) "
+                  "VALUES (:eid, :score, :grade, :gp, :remarks)");
+    query.bindValue(":eid", enrollmentId);
     query.bindValue(":score", score);
     
     QString gradeStr = "F";
@@ -37,32 +36,36 @@ bool GradeManager::addGrade(int studentId, const QString &course, float score) {
     return query.exec();
 }
 
-QVector<Grade> GradeManager::getGrades(int filterId, const QString &courseFilter) const {
+QVector<Grade> GradeManager::getGrades(int studentId, const QString &teacherCourse) const {
     QVector<Grade> grades;
     QSqlQuery query;
     
-    QString sql = "SELECT * FROM grades";
+    // Complex join to get course credits and names along with grades
+    QString sql = "SELECT g.*, c.courseName, c.credits FROM grades g "
+                  "JOIN enrollments e ON g.enrollmentId = e.id "
+                  "JOIN course_offerings o ON e.offeringId = o.id "
+                  "JOIN courses c ON o.courseCode = c.courseCode ";
+    
     QStringList conditions;
-    
-    if (filterId != -1) conditions << "studentId = :id";
-    if (!courseFilter.isEmpty()) conditions << "courseCode = :course";
-    
-    if (!conditions.isEmpty()) {
-        sql += " WHERE " + conditions.join(" AND ");
-    }
+    if (studentId != -1) conditions << "e.studentId = :sid";
+    if (!teacherCourse.isEmpty()) conditions << "o.courseCode = :course";
+
+    if (!conditions.isEmpty()) sql += " WHERE " + conditions.join(" AND ");
     
     query.prepare(sql);
-    if (filterId != -1) query.bindValue(":id", filterId);
-    if (!courseFilter.isEmpty()) query.bindValue(":course", courseFilter);
+    if (studentId != -1) query.bindValue(":sid", studentId);
+    if (!teacherCourse.isEmpty()) query.bindValue(":course", teacherCourse);
     
     if (query.exec()) {
         while (query.next()) {
             Grade g;
-            g.studentId = query.value("studentId").toInt();
-            g.course = query.value("courseCode").toString();
+            g.id = query.value("id").toInt();
+            g.enrollmentId = query.value("enrollmentId").toInt();
             g.score = query.value("score").toFloat();
             g.letterGrade = query.value("grade").toString();
             g.gradePoint = query.value("gradePoint").toFloat();
+            g.credits = query.value("credits").toFloat();
+            g.courseName = query.value("courseName").toString();
             grades.push_back(g);
         }
     }

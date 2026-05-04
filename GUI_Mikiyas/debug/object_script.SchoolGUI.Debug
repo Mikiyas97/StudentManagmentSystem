@@ -7,6 +7,9 @@ debug/coursemanager.o
 debug/reportmanager.o
 debug/usermanager.o
 debug/enrollmentmanager.o
+debug/sectionmanager.o
+debug/subjectmanager.o
+debug/markmanager.o
 debug/studentpage.o
 debug/studentformdialog.o
 debug/studentdetaildialog.o
@@ -15,6 +18,7 @@ debug/coursepage.o
 debug/reportpage.o
 debug/teacherpage.o
 debug/enrollmentpage.o
+debug/offeringpage.o
 debug/profilepage.o
 debug/moc_mainwindow.o
 debug/moc_logindialog.o
@@ -26,4 +30,5 @@ debug/moc_coursepage.o
 debug/moc_reportpage.o
 debug/moc_teacherpage.o
 debug/moc_enrollmentpage.o
+debug/moc_offeringpage.o
 debug/moc_profilepage.o

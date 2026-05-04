@@ -5,6 +5,7 @@
 #include "pages/reportpage.h"
 #include "pages/teacherpage.h"
 #include "pages/enrollmentpage.h"
+#include "pages/offeringpage.h"
 #include "pages/profilepage.h"
 #include "managers/usermanager.h"
 #include <QHBoxLayout>
@@ -65,20 +66,34 @@ void MainWindow::setupUI() {
     if (userRole == "admin") {
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 0));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 1));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Courses"), 2));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8B  Enrollments"), 3));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Grades"), 4));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Reports"), 5));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Subjects"), 2));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\xAB  Sections"), 3));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Marks"), 4));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\x86  Ranking"), 5));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Reports"), 6));
     } else if (userRole == "teacher") {
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  My Profile"), 0));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  My Students"), 1));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Grades"), 2));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Enter Marks"), 2));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\x86  Class Ranking"), 3));
     } else {
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  My Profile"), 0));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  My Grades"), 1));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  My Marks"), 1));
     }
 
     sideLayout->addStretch();
+
+    // --- Sync Button ---
+    QPushButton *refreshBtn = new QPushButton(QString::fromUtf8("  \xF0\x9F\x94\x84  Sync Database"));
+    refreshBtn->setObjectName("syncButton");
+    refreshBtn->setCursor(Qt::PointingHandCursor);
+    refreshBtn->setStyleSheet(
+        "QPushButton { background-color: transparent; border: 1px solid #e94560; "
+        "color: #e94560; margin: 10px 15px; padding: 8px; border-radius: 4px; font-weight: bold; }"
+        "QPushButton:hover { background-color: #e94560; color: white; }"
+    );
+    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::onGlobalRefresh);
+    sideLayout->addWidget(refreshBtn);
 
     // Role info at bottom of sidebar
     roleLabel = new QLabel;
@@ -136,17 +151,19 @@ void MainWindow::setupUI() {
     if (userRole == "admin") {
         stack->addWidget(new TeacherPage);         // 0
         stack->addWidget(new StudentPage("admin"));// 1
-        stack->addWidget(new CoursePage);          // 2
-        stack->addWidget(new EnrollmentPage);      // 3
-        stack->addWidget(new GradePage("admin"));  // 4
-        stack->addWidget(new ReportPage);          // 5
+        stack->addWidget(new CoursePage);          // 2 (SubjectPage)
+        stack->addWidget(new OfferingPage);        // 3 (SectionPage)
+        stack->addWidget(new EnrollmentPage("admin")); // 4 (MarkEntry)
+        stack->addWidget(new GradePage("admin"));      // 5 (Ranking)
+        stack->addWidget(new ReportPage);          // 6
     } else if (userRole == "teacher") {
         stack->addWidget(new ProfilePage("teacher", userStudentId)); // 0
         stack->addWidget(new StudentPage("teacher", userStudentId)); // 1
-        stack->addWidget(new GradePage("teacher", userStudentId));   // 2
+        stack->addWidget(new EnrollmentPage("teacher", userStudentId)); // 2 (MarkEntry)
+        stack->addWidget(new GradePage("teacher", userStudentId));   // 3 (Ranking)
     } else {
         stack->addWidget(new ProfilePage("student", userStudentId)); // 0
-        stack->addWidget(new GradePage("student", userStudentId));   // 1
+        stack->addWidget(new EnrollmentPage("student", userStudentId)); // 1 (View Marks)
     }
 
     mainLayout->addWidget(stack, 1);
@@ -158,6 +175,10 @@ void MainWindow::setupUI() {
 void MainWindow::switchPage(int index) {
     if (index < 0 || index >= stack->count()) return;
     stack->setCurrentIndex(index);
+    activePage = index;
+    
+    // Auto-refresh when switching pages
+    onGlobalRefresh();
 
     // Update active button styling
     for (int i = 0; i < navButtons.size(); ++i) {
@@ -178,4 +199,12 @@ void MainWindow::switchPage(int index) {
         }
     }
     activePage = index;
+}
+
+void MainWindow::onGlobalRefresh() {
+    QWidget *currentPage = stack->currentWidget();
+    if (currentPage) {
+        // Dynamically invoke refreshTable() if it exists on the page
+        QMetaObject::invokeMethod(currentPage, "refreshTable");
+    }
 }

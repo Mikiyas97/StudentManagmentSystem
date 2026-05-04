@@ -40,24 +40,16 @@ template <> constexpr inline auto GradePage::qt_create_metaobjectdata<qt_meta_ta
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "GradePage",
-        "onAdd",
+        "onCalculate",
         "",
-        "onFilter",
-        "refreshTable",
-        "filterId"
+        "refreshTable"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onAdd'
+        // Slot 'onCalculate'
         QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onFilter'
+        // Slot 'refreshTable'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'refreshTable'
-        QtMocHelpers::SlotData<void(int)>(4, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 5 },
-        }}),
-        // Slot 'refreshTable'
-        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate | QMC::MethodCloned, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -81,13 +73,12 @@ void GradePage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
     auto *_t = static_cast<GradePage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onAdd(); break;
-        case 1: _t->onFilter(); break;
-        case 2: _t->refreshTable((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
-        case 3: _t->refreshTable(); break;
+        case 0: _t->onCalculate(); break;
+        case 1: _t->refreshTable(); break;
         default: ;
         }
     }
+    (void)_a;
 }
 
 const QMetaObject *GradePage::metaObject() const
@@ -109,14 +100,14 @@ int GradePage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 2)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 2;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 2)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 2;
     }
     return _id;
 }

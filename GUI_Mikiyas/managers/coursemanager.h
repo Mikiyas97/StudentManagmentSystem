@@ -5,19 +5,17 @@
 #include <QVector>
 
 struct Course {
-    QString id;
+    QString code;
     QString name;
-    int credits;
+    float credits;
+    QString college;
 };
 
 class CourseManager {
 public:
     CourseManager();
-    bool addCourse(const QString &id, const QString &name, int credits);
+    bool addCourse(const Course &c);
     QVector<Course> getCourses();
-
-private:
-    // File I/O removed in favor of SQLite
 };
 
 #endif // COURSEMANAGER_H

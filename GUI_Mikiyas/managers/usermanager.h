@@ -7,7 +7,6 @@
 struct Teacher {
     int id;
     QString fullName;
-    QString courseCode;
     QString phone;
     QString email;
 };

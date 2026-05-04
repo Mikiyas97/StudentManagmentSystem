@@ -3,34 +3,27 @@
 
 #include <QWidget>
 #include <QTableWidget>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QDoubleSpinBox>
+#include <QComboBox>
 #include <QLabel>
-#include "../managers/grademanager.h"
+#include "../managers/markmanager.h"
 
 class GradePage : public QWidget {
     Q_OBJECT
 public:
-    explicit GradePage(const QString &role = "admin", int studentId = -1,
+    explicit GradePage(const QString &role = "admin", int id = -1,
                        QWidget *parent = nullptr);
 
 private slots:
-    void onAdd();
-    void onFilter();
-    void refreshTable(int filterId = -1);
+    void onCalculate();
+    void refreshTable();
 
 private:
-    GradeManager manager;
+    MarkManager manager;
     QTableWidget *table;
-    QSpinBox *sidSpin;
-    QLineEdit *courseEdit;
-    QDoubleSpinBox *scoreSpin;
-    QSpinBox *filterSpin;
-    QLabel *gpaLabel;
+    QComboBox *sectionCombo;
+    QComboBox *yearCombo;
     QString userRole;
-    int userStudentId;
-    QString teacherCourse;
+    int userId;
 };
 
 #endif // GRADEPAGE_H

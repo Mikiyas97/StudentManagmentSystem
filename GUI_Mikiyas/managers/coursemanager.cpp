@@ -7,12 +7,14 @@
 CourseManager::CourseManager() {
 }
 
-bool CourseManager::addCourse(const QString &id, const QString &name, int credits) {
+bool CourseManager::addCourse(const Course &c) {
     QSqlQuery query;
-    query.prepare("INSERT INTO courses (code, title, credits) VALUES (:code, :title, :credits)");
-    query.bindValue(":code", id);
-    query.bindValue(":title", name);
-    query.bindValue(":credits", credits);
+    query.prepare("INSERT INTO courses (courseCode, courseName, credits, college) "
+                  "VALUES (:code, :name, :credits, :college)");
+    query.bindValue(":code", c.code);
+    query.bindValue(":name", c.name);
+    query.bindValue(":credits", c.credits);
+    query.bindValue(":college", c.college);
     return query.exec();
 }
 
@@ -21,9 +23,10 @@ QVector<Course> CourseManager::getCourses() {
     QSqlQuery query("SELECT * FROM courses");
     while (query.next()) {
         Course c;
-        c.id = query.value("code").toString();
-        c.name = query.value("title").toString();
-        c.credits = query.value("credits").toInt();
+        c.code = query.value("courseCode").toString();
+        c.name = query.value("courseName").toString();
+        c.credits = query.value("credits").toFloat();
+        c.college = query.value("college").toString();
         courses.push_back(c);
     }
     return courses;

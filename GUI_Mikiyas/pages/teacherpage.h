@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTableWidget>
+#include <QComboBox>
 #include <QLineEdit>
 #include "managers/usermanager.h"
 
@@ -18,7 +19,8 @@ private slots:
 private:
     QTableWidget *table;
     QLineEdit *nameEdit;
-    QLineEdit *courseEdit;
+    QComboBox *subjectCombo;
+    QComboBox *sectionCombo;
     QLineEdit *phoneEdit;
     QLineEdit *emailEdit;
     UserManager manager;

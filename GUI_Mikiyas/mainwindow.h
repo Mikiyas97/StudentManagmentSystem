@@ -14,6 +14,7 @@ public:
 
 private slots:
     void switchPage(int index);
+    void onGlobalRefresh();
 
 private:
     void setupUI();

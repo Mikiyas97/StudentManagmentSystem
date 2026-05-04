@@ -16,69 +16,62 @@ bool setupDatabase() {
     }
     
     QSqlQuery query;
-    // Create users table
-    query.exec("CREATE TABLE IF NOT EXISTS users ("
-               "username TEXT PRIMARY KEY, "
-               "password TEXT, "
-               "role TEXT, "
-               "relatedId INTEGER)");
+    
+    // 1. Core Structure Tables
+    query.exec("CREATE TABLE IF NOT EXISTS academic_years (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
+    query.exec("CREATE TABLE IF NOT EXISTS grade_levels (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
+    query.exec("CREATE TABLE IF NOT EXISTS streams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
+    query.exec("CREATE TABLE IF NOT EXISTS sections (id INTEGER PRIMARY KEY AUTOINCREMENT, grade_id INTEGER, name TEXT, year_id INTEGER, "
+               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+
+    // 2. People Tables
+    query.exec("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, fullName TEXT, grade_id INTEGER, section_id INTEGER, stream_id INTEGER, "
+               "phone TEXT, email TEXT, status TEXT, "
+               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(stream_id) REFERENCES streams(id))");
                
-    // Insert default admin if not exists
+    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, phone TEXT, email TEXT)");
+
+    // 3. User Accounts
+    query.exec("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT, role TEXT, relatedId INTEGER)");
+
+    // 4. Academic Data Tables
+    query.exec("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, grade_id INTEGER, stream_id INTEGER, "
+               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(stream_id) REFERENCES streams(id))");
+
+    query.exec("CREATE TABLE IF NOT EXISTS teaching_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, "
+               "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
+               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+
+    query.exec("CREATE TABLE IF NOT EXISTS homeroom_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, section_id INTEGER, year_id INTEGER, "
+               "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+
+    query.exec("CREATE TABLE IF NOT EXISTS marks (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, score REAL, "
+               "FOREIGN KEY(student_id) REFERENCES students(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
+               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+
+    // --- Seeding Initial Data ---
+    
+    // Seed Academic Year
+    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2025/2026')");
+    
+    // Seed Grade Levels
+    QStringList grades = {"9", "10", "11", "12"};
+    for (const QString &g : grades) {
+        query.prepare("INSERT OR IGNORE INTO grade_levels (name) VALUES (?)");
+        query.addBindValue(g);
+        query.exec();
+    }
+
+    // Seed Streams
+    query.exec("INSERT OR IGNORE INTO streams (name) VALUES ('Natural Science')");
+    query.exec("INSERT OR IGNORE INTO streams (name) VALUES ('Social Science')");
+
+    // Seed default admin
     QSqlQuery checkAdmin("SELECT * FROM users WHERE username = 'admin'");
     if (!checkAdmin.next()) {
         query.exec("INSERT INTO users (username, password, role, relatedId) "
                    "VALUES ('admin', 'admin123', 'admin', -1)");
     }
-
-    // Create students table
-    query.exec("CREATE TABLE IF NOT EXISTS students ("
-               "id INTEGER PRIMARY KEY, "
-               "fullName TEXT, "
-               "age INTEGER, "
-               "gender TEXT, "
-               "className TEXT, "
-               "phone TEXT, "
-               "email TEXT, "
-               "address TEXT, "
-               "guardianName TEXT, "
-               "guardianContact TEXT, "
-               "status TEXT)");
-               
-    // Create teachers table
-    QSqlQuery checkT("PRAGMA table_info(teachers)");
-    bool hasCC = false;
-    while(checkT.next()) if(checkT.value(1).toString() == "courseCode") hasCC = true;
-    if(!hasCC) query.exec("DROP TABLE IF EXISTS teachers");
-
-    query.exec("CREATE TABLE IF NOT EXISTS teachers ("
-               "id INTEGER PRIMARY KEY, "
-               "fullName TEXT, "
-               "courseCode TEXT, "
-               "phone TEXT, "
-               "email TEXT)");
-
-    // Create courses table
-    query.exec("CREATE TABLE IF NOT EXISTS courses ("
-               "code TEXT PRIMARY KEY, "
-               "title TEXT, "
-               "credits INTEGER, "
-               "department TEXT)");
-               
-    // Create enrollments table
-    query.exec("CREATE TABLE IF NOT EXISTS enrollments ("
-               "studentId INTEGER, "
-               "courseCode TEXT, "
-               "PRIMARY KEY(studentId, courseCode))");
-
-    // Create grades table
-    query.exec("CREATE TABLE IF NOT EXISTS grades ("
-               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-               "studentId INTEGER, "
-               "courseCode TEXT, "
-               "score REAL, "
-               "grade TEXT, "
-               "gradePoint REAL, "
-               "remarks TEXT)");
                
     return true;
 }

@@ -11,15 +11,13 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QCheckBox>
+#include <QSqlQuery>
+#include <QSqlError>
 
 StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget(parent), userRole(role)
 {
     if (userRole == "teacher") {
-        UserManager um;
-        Teacher t = um.getTeacherById(id);
-        if (t.id != -1) {
-            teacherCourse = t.courseCode;
-        }
+        // Teacher specific filtering will be implemented via assignments
     }
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -124,17 +122,19 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget
 
     // ── Table ──
     table = new QTableWidget;
-    table->setColumnCount(6);
+    table->setColumnCount(8);
     QStringList headers;
-    headers << "" << "ID" << "Name" << "Class" << "Status" << "Actions";
+    headers << "" << "ID" << "Name" << "Grade" << "Section" << "Stream" << "Status" << "Actions";
     table->setHorizontalHeaderLabels(headers);
     table->horizontalHeader()->setStretchLastSection(true);
     table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
     table->setColumnWidth(0, 35);   // checkbox
-    table->setColumnWidth(1, 80);   // ID
-    table->setColumnWidth(2, 180);  // Name
-    table->setColumnWidth(3, 130);  // Class
-    table->setColumnWidth(4, 90);   // Status
+    table->setColumnWidth(1, 70);   // ID
+    table->setColumnWidth(2, 160);  // Name
+    table->setColumnWidth(3, 70);   // Grade
+    table->setColumnWidth(4, 70);   // Section
+    table->setColumnWidth(5, 120);  // Stream
+    table->setColumnWidth(6, 90);   // Status
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setAlternatingRowColors(true);
@@ -164,14 +164,10 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget
 // ── Helpers ──
 
 QStringList StudentPage::getUniqueClasses() const {
-    QStringList classes;
-    QVector<Student> all = manager.getStudents();
-    for (int i = 0; i < all.size(); ++i) {
-        QString c = all[i].className;
-        if (!c.isEmpty() && !classes.contains(c)) classes << c;
-    }
-    classes.sort();
-    return classes;
+    QStringList grades;
+    QSqlQuery query("SELECT name FROM grade_levels ORDER BY name ASC");
+    while (query.next()) grades << query.value(0).toString();
+    return grades;
 }
 
 QVector<int> StudentPage::getCheckedIds() const {
@@ -192,20 +188,21 @@ QVector<int> StudentPage::getCheckedIds() const {
 void StudentPage::refreshTable() {
     manager = StudentManager(); // reload
 
-    // Update class filter combo
-    QString prevClass = classFilterCombo->currentText();
+    // Update grade filter combo
+    QString prevGrade = classFilterCombo->currentText();
     classFilterCombo->blockSignals(true);
     classFilterCombo->clear();
     classFilterCombo->addItem("All");
     classFilterCombo->addItems(getUniqueClasses());
-    int idx = classFilterCombo->findText(prevClass);
+    int idx = classFilterCombo->findText(prevGrade);
     if (idx >= 0) classFilterCombo->setCurrentIndex(idx);
     classFilterCombo->blockSignals(false);
 
     // Get filtered data
     QVector<Student> students;
     if (userRole == "teacher") {
-        students = manager.getStudentsByCourse(teacherCourse);
+        // Teacher logic will be updated later with TeachingAssignment
+        students = manager.getStudents(); 
     } else {
         students = manager.filter(searchEdit->text().trimmed(),
                                   classFilterCombo->currentText(),
@@ -230,14 +227,16 @@ void StudentPage::refreshTable() {
         // Data cells
         table->setItem(i, 1, new QTableWidgetItem(QString::number(s.id)));
         table->setItem(i, 2, new QTableWidgetItem(s.fullName));
-        table->setItem(i, 3, new QTableWidgetItem(s.className));
+        table->setItem(i, 3, new QTableWidgetItem(s.gradeName));
+        table->setItem(i, 4, new QTableWidgetItem(s.sectionName));
+        table->setItem(i, 5, new QTableWidgetItem(s.streamName.isEmpty() ? "General" : s.streamName));
 
         // Status with color
         QTableWidgetItem *statusItem = new QTableWidgetItem(s.status);
         if (s.status == "Active")       statusItem->setForeground(QColor("#2ecc71"));
         else if (s.status == "Inactive")  statusItem->setForeground(QColor("#e74c3c"));
-        else if (s.status == "Graduated") statusItem->setForeground(QColor("#3498db"));
-        table->setItem(i, 4, statusItem);
+        else if (s.status == "Withdrawn") statusItem->setForeground(QColor("#e67e22"));
+        table->setItem(i, 6, statusItem);
 
         // Action buttons
         QWidget *actWidget = new QWidget;
@@ -290,7 +289,7 @@ void StudentPage::refreshTable() {
             actLayout->addWidget(editBtn);
             actLayout->addWidget(delBtn);
         }
-        table->setCellWidget(i, 5, actWidget);
+        table->setCellWidget(i, 7, actWidget);
 
         table->setRowHeight(i, 38);
     }
@@ -303,8 +302,6 @@ void StudentPage::refreshTable() {
 void StudentPage::onAddStudent() {
     Student blank;
     blank.id = manager.generateNextId();
-    blank.age = 18;
-    blank.gender = "Male";
     blank.status = "Active";
 
     StudentFormDialog dlg(blank, false, this);

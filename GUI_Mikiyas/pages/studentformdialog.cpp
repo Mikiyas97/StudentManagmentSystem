@@ -6,13 +6,13 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QGroupBox>
+#include <QSqlQuery>
 
 StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *parent)
     : QDialog(parent), editing(editMode)
 {
     setWindowTitle(editing ? "Edit Student" : "Add New Student");
-    // Increased height slightly to prevent vertical compression
-    setFixedSize(520, 720); 
+    setFixedSize(500, 650); 
 
     QVBoxLayout *main = new QVBoxLayout(this);
     main->setSpacing(15);
@@ -20,41 +20,87 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
 
     QLabel *title = new QLabel(editing ? "Edit Student" : "Add New Student");
     title->setObjectName("pageTitle");
-    title->setStyleSheet("font-size: 22px; font-weight: bold; color: #e94560; margin-bottom: 5px;");
     main->addWidget(title);
 
-    // --- Personal Info Section ---
-    QGroupBox *personalGroup = new QGroupBox("Personal Information");
-    QFormLayout *pLayout = new QFormLayout(personalGroup);
-    pLayout->setSpacing(12);
-    pLayout->setContentsMargins(15, 25, 15, 15);
-    pLayout->setLabelAlignment(Qt::AlignLeft);
+    // --- Academic Info Section ---
+    QGroupBox *academicGroup = new QGroupBox("Academic Information");
+    QFormLayout *aLayout = new QFormLayout(academicGroup);
+    aLayout->setSpacing(12);
+    aLayout->setContentsMargins(15, 25, 15, 15);
 
     idSpin = new QSpinBox;
     idSpin->setRange(1, 9999999);
     idSpin->setValue(s.id > 0 ? s.id : 1);
     if (editing) idSpin->setReadOnly(true);
-    pLayout->addRow("Student ID:", idSpin);
+    aLayout->addRow("Student ID:", idSpin);
 
     nameEdit = new QLineEdit(s.fullName);
     nameEdit->setPlaceholderText("Full name");
-    pLayout->addRow("Full Name:", nameEdit);
+    aLayout->addRow("Full Name:", nameEdit);
 
-    ageSpin = new QSpinBox;
-    ageSpin->setRange(3, 100);
-    ageSpin->setValue(s.age > 0 ? s.age : 18);
-    pLayout->addRow("Age:", ageSpin);
+    gradeCombo = new QComboBox;
+    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY name ASC");
+    while (gq.next()) {
+        gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    }
+    aLayout->addRow("Grade Level:", gradeCombo);
 
-    genderCombo = new QComboBox;
-    genderCombo->addItems(QStringList() << "Male" << "Female" << "Other");
-    if (!s.gender.isEmpty()) genderCombo->setCurrentText(s.gender);
-    pLayout->addRow("Gender:", genderCombo);
+    sectionCombo = new QComboBox;
+    auto updateSections = [this](int) {
+        sectionCombo->clear();
+        int gradeId = gradeCombo->currentData().toInt();
+        QSqlQuery sq;
+        sq.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
+        sq.addBindValue(gradeId);
+        if (sq.exec()) {
+            while (sq.next()) sectionCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+        }
+    };
+    connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
+    aLayout->addRow("Section:", sectionCombo);
 
-    classEdit = new QLineEdit(s.className);
-    classEdit->setPlaceholderText("e.g. Grade 10, CS Department");
-    pLayout->addRow("Class / Dept:", classEdit);
+    streamCombo = new QComboBox;
+    streamCombo->addItem("None", 0);
+    QSqlQuery stq("SELECT id, name FROM streams");
+    while (stq.next()) {
+        streamCombo->addItem(stq.value("name").toString(), stq.value("id").toInt());
+    }
+    
+    auto updateStreamLogic = [this](int) {
+        QString grade = gradeCombo->currentText();
+        bool needsStream = (grade == "11" || grade == "12");
+        streamCombo->setEnabled(needsStream);
+        if (!needsStream) streamCombo->setCurrentIndex(0); // Select "None"
+    };
+    connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateStreamLogic);
+    aLayout->addRow("Stream (11/12):", streamCombo);
 
-    main->addWidget(personalGroup);
+    // Initialize values
+    if (s.grade_id > 0) {
+        for (int i=0; i<gradeCombo->count(); ++i) {
+            if (gradeCombo->itemData(i).toInt() == s.grade_id) {
+                gradeCombo->setCurrentIndex(i); break;
+            }
+        }
+    }
+    updateSections(gradeCombo->currentIndex());
+    if (s.section_id > 0) {
+        for (int i=0; i<sectionCombo->count(); ++i) {
+            if (sectionCombo->itemData(i).toInt() == s.section_id) {
+                sectionCombo->setCurrentIndex(i); break;
+            }
+        }
+    }
+    updateStreamLogic(gradeCombo->currentIndex());
+    if (s.stream_id > 0) {
+        for (int i=0; i<streamCombo->count(); ++i) {
+            if (streamCombo->itemData(i).toInt() == s.stream_id) {
+                streamCombo->setCurrentIndex(i); break;
+            }
+        }
+    }
+
+    main->addWidget(academicGroup);
 
     // --- Contact Info Section ---
     QGroupBox *contactGroup = new QGroupBox("Contact Information");
@@ -70,37 +116,14 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
     emailEdit->setPlaceholderText("student@example.com");
     cLayout->addRow("Email:", emailEdit);
 
-    addressEdit = new QTextEdit(s.address);
-    addressEdit->setPlaceholderText("Full address");
-    addressEdit->setMaximumHeight(60);
-    cLayout->addRow("Address:", addressEdit);
-
     main->addWidget(contactGroup);
 
-    // --- Guardian Info Section ---
-    QGroupBox *guardGroup = new QGroupBox("Guardian Information");
-    QFormLayout *gLayout = new QFormLayout(guardGroup);
-    gLayout->setSpacing(12);
-    gLayout->setContentsMargins(15, 25, 15, 15);
-
-    guardianEdit = new QLineEdit(s.guardianName);
-    guardianEdit->setPlaceholderText("Parent/Guardian name");
-    gLayout->addRow("Guardian:", guardianEdit);
-
-    guardianPhoneEdit = new QLineEdit(s.guardianContact);
-    guardianPhoneEdit->setPlaceholderText("Guardian phone");
-    gLayout->addRow("Guardian Phone:", guardianPhoneEdit);
-
-    main->addWidget(guardGroup);
-
-    // --- Status Section (Edit Mode Only) ---
+    // --- Status Section ---
     if (editing) {
         QGroupBox *statusGroup = new QGroupBox("Status");
         QFormLayout *sLayout = new QFormLayout(statusGroup);
-        sLayout->setContentsMargins(15, 25, 15, 15);
-        
         statusCombo = new QComboBox;
-        statusCombo->addItems(QStringList() << "Active" << "Inactive" << "Graduated");
+        statusCombo->addItems(QStringList() << "Active" << "Inactive" << "Withdrawn");
         statusCombo->setCurrentText(s.status);
         sLayout->addRow("Status:", statusCombo);
         main->addWidget(statusGroup);
@@ -110,18 +133,13 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
 
     // --- Action Buttons ---
     QHBoxLayout *btnRow = new QHBoxLayout;
-    btnRow->setContentsMargins(0, 10, 0, 0);
     btnRow->addStretch();
 
     QPushButton *cancelBtn = new QPushButton("Cancel");
     cancelBtn->setObjectName("secondaryButton");
-    cancelBtn->setCursor(Qt::PointingHandCursor);
-    cancelBtn->setMinimumSize(100, 35);
     connect(cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
 
     QPushButton *saveBtn = new QPushButton(editing ? "Save Changes" : "Add Student");
-    saveBtn->setCursor(Qt::PointingHandCursor);
-    saveBtn->setMinimumSize(120, 35);
     connect(saveBtn, &QPushButton::clicked, this, &StudentFormDialog::onSave);
 
     btnRow->addWidget(cancelBtn);
@@ -134,22 +152,19 @@ void StudentFormDialog::onSave() {
         QMessageBox::warning(this, "Validation", "Full Name is required.");
         return;
     }
-    if (classEdit->text().trimmed().isEmpty()) {
-        QMessageBox::warning(this, "Validation", "Class / Department is required.");
+
+    if (gradeCombo->currentIndex() == -1) {
+        QMessageBox::warning(this, "Validation", "Grade Level is required.");
         return;
     }
 
     result.id             = idSpin->value();
     result.fullName        = nameEdit->text().trimmed();
-    result.age             = ageSpin->value();
-    result.gender          = genderCombo->currentText();
-    result.className       = classEdit->text().trimmed();
+    result.grade_id        = gradeCombo->currentData().toInt();
+    result.section_id      = sectionCombo->currentData().toInt();
+    result.stream_id       = streamCombo->isEnabled() ? streamCombo->currentData().toInt() : 0;
     result.phone           = phoneEdit->text().trimmed();
     result.email           = emailEdit->text().trimmed();
-    // Clean data for file safety
-    result.address         = addressEdit->toPlainText().trimmed().replace('|', ' ').replace('\n', ' ');
-    result.guardianName    = guardianEdit->text().trimmed();
-    result.guardianContact = guardianPhoneEdit->text().trimmed();
     result.status          = statusCombo ? statusCombo->currentText() : "Active";
 
     accept();

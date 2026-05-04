@@ -5,17 +5,18 @@
 #include <QVector>
 
 struct Enrollment {
+    int id;
     int studentId;
-    QString courseCode;
+    int offeringId;
+    QString courseName; // for display
 };
 
 class EnrollmentManager {
 public:
     EnrollmentManager();
-    bool enrollStudent(int studentId, const QString &courseCode);
-    bool unenrollStudent(int studentId, const QString &courseCode);
-    QVector<QString> getCoursesForStudent(int studentId) const;
-    QVector<int> getStudentsInCourse(const QString &courseCode) const;
+    bool enrollStudent(int studentId, int offeringId);
+    bool unenrollStudent(int studentId, int offeringId);
+    QVector<Enrollment> getEnrollmentsForStudent(int studentId) const;
 };
 
 #endif // ENROLLMENTMANAGER_H

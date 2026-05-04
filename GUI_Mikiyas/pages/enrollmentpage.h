@@ -3,31 +3,28 @@
 
 #include <QWidget>
 #include <QTableWidget>
-#include <QSpinBox>
-#include <QLineEdit>
-#include "managers/enrollmentmanager.h"
-#include "managers/studentmanager.h"
+#include <QComboBox>
+#include <QLabel>
+#include "../managers/markmanager.h"
 
 class EnrollmentPage : public QWidget {
     Q_OBJECT
 public:
-    explicit EnrollmentPage(QWidget *parent = nullptr);
+    explicit EnrollmentPage(const QString &role = "admin", int studentId = -1, QWidget *parent = nullptr);
 
 private slots:
-    void onEnroll();
-    void onUnenroll();
-    void onSearch();
+    void onSaveAll();
+    void onFilter();
+    void refreshTable();
 
 private:
-    void refreshTable(int studentId);
-
+    MarkManager manager;
     QTableWidget *table;
-    QSpinBox *studentIdSpin;
-    QLineEdit *courseCodeEdit;
-    QSpinBox *searchSpin;
-    
-    EnrollmentManager manager;
-    StudentManager studentManager;
+    QComboBox *sectionFilter;
+    QComboBox *subjectFilter;
+    QLabel *averageLabel;
+    QString userRole;
+    int userStudentId;
 };
 
 #endif // ENROLLMENTPAGE_H

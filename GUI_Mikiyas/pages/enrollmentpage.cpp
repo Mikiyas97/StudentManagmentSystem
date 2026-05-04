@@ -1,114 +1,139 @@
 #include "enrollmentpage.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGroupBox>
-#include <QPushButton>
 #include <QLabel>
+#include <QPushButton>
 #include <QHeaderView>
+#include <QSqlQuery>
+#include <QDoubleSpinBox>
 #include <QMessageBox>
 
-EnrollmentPage::EnrollmentPage(QWidget *parent) : QWidget(parent) {
+EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
+    : QWidget(parent), userRole(role), userStudentId(id)
+{
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(15);
     layout->setContentsMargins(25, 20, 25, 20);
 
-    QLabel *title = new QLabel("Enrollments");
+    QLabel *title = new QLabel(userRole == "student" ? "My Academic Results" : "Batch Mark Entry");
     title->setObjectName("pageTitle");
     layout->addWidget(title);
 
-    // Add Enrollment Group
-    QGroupBox *addGroup = new QGroupBox("Manage Enrollment");
-    QHBoxLayout *addLayout = new QHBoxLayout(addGroup);
-    
-    addLayout->addWidget(new QLabel("Student ID:"));
-    studentIdSpin = new QSpinBox;
-    studentIdSpin->setRange(1, 9999999);
-    addLayout->addWidget(studentIdSpin);
+    if (userRole != "student") {
+        // --- Entry Controls (Admin/Teacher) ---
+        QHBoxLayout *filterBar = new QHBoxLayout;
+        
+        sectionFilter = new QComboBox;
+        QSqlQuery sq("SELECT id, name FROM sections");
+        while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
+        filterBar->addWidget(new QLabel("Section:"));
+        filterBar->addWidget(sectionFilter);
 
-    addLayout->addWidget(new QLabel("Course Code:"));
-    courseCodeEdit = new QLineEdit;
-    addLayout->addWidget(courseCodeEdit);
+        subjectFilter = new QComboBox;
+        QSqlQuery subq("SELECT id, name FROM subjects");
+        while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
+        filterBar->addWidget(new QLabel("Subject:"));
+        filterBar->addWidget(subjectFilter);
 
-    QPushButton *enrollBtn = new QPushButton("Enroll");
-    QPushButton *unenrollBtn = new QPushButton("Unenroll");
-    unenrollBtn->setObjectName("secondaryButton");
-    
-    addLayout->addWidget(enrollBtn);
-    addLayout->addWidget(unenrollBtn);
-    addLayout->addStretch();
-    layout->addWidget(addGroup);
+        QPushButton *loadBtn = new QPushButton("Load Students");
+        connect(loadBtn, &QPushButton::clicked, this, &EnrollmentPage::onFilter);
+        filterBar->addWidget(loadBtn);
 
-    connect(enrollBtn, &QPushButton::clicked, this, &EnrollmentPage::onEnroll);
-    connect(unenrollBtn, &QPushButton::clicked, this, &EnrollmentPage::onUnenroll);
+        QPushButton *saveBtn = new QPushButton("Save All Changes");
+        saveBtn->setStyleSheet("background-color: #2ecc71; color: white; font-weight: bold;");
+        connect(saveBtn, &QPushButton::clicked, this, &EnrollmentPage::onSaveAll);
+        filterBar->addWidget(saveBtn);
+        
+        filterBar->addStretch();
+        layout->addLayout(filterBar);
+    }
 
-    // Search
-    QGroupBox *searchGroup = new QGroupBox("View Student Enrollments");
-    QHBoxLayout *searchLayout = new QHBoxLayout(searchGroup);
-    
-    searchLayout->addWidget(new QLabel("Student ID:"));
-    searchSpin = new QSpinBox;
-    searchSpin->setRange(1, 9999999);
-    searchLayout->addWidget(searchSpin);
-
-    QPushButton *searchBtn = new QPushButton("Search");
-    searchLayout->addWidget(searchBtn);
-    searchLayout->addStretch();
-    layout->addWidget(searchGroup);
-
-    connect(searchBtn, &QPushButton::clicked, this, &EnrollmentPage::onSearch);
-
-    // Table
+    // --- Table ---
     table = new QTableWidget;
-    table->setColumnCount(1);
-    QStringList headers;
-    headers << "Enrolled Course Code";
-    table->setHorizontalHeaderLabels(headers);
+    if (userRole == "student") {
+        table->setColumnCount(3);
+        table->setHorizontalHeaderLabels({"Subject", "Score (100)", "Result"});
+    } else {
+        table->setColumnCount(3);
+        table->setHorizontalHeaderLabels({"Student ID", "Full Name", "Mark (0-100)"});
+    }
     table->horizontalHeader()->setStretchLastSection(true);
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    layout->addWidget(table, 1);
+    table->setAlternatingRowColors(true);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    layout->addWidget(table);
+
+    averageLabel = new QLabel;
+    averageLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: #e94560; margin-top: 10px;");
+    layout->addWidget(averageLabel);
+
+    refreshTable();
 }
 
-void EnrollmentPage::onEnroll() {
-    int sId = studentIdSpin->value();
-    QString code = courseCodeEdit->text().trimmed();
-    if (code.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Course code is required.");
-        return;
-    }
-    
-    // Check if student exists
-    if (studentManager.getStudentById(sId).id == -1) {
-        QMessageBox::warning(this, "Error", "Student ID does not exist.");
-        return;
-    }
-
-    if (manager.enrollStudent(sId, code)) {
-        QMessageBox::information(this, "Success", "Student enrolled in course.");
-        if (searchSpin->value() == sId) refreshTable(sId);
-    } else {
-        QMessageBox::warning(this, "Error", "Failed to enroll. Maybe already enrolled?");
-    }
-}
-
-void EnrollmentPage::onUnenroll() {
-    int sId = studentIdSpin->value();
-    QString code = courseCodeEdit->text().trimmed();
-    if (manager.unenrollStudent(sId, code)) {
-        QMessageBox::information(this, "Success", "Student unenrolled from course.");
-        if (searchSpin->value() == sId) refreshTable(sId);
-    } else {
-        QMessageBox::warning(this, "Error", "Failed to unenroll.");
+void EnrollmentPage::refreshTable() {
+    table->setRowCount(0);
+    if (userRole == "student") {
+        QSqlQuery query;
+        query.prepare("SELECT sub.name, m.score FROM marks m "
+                      "JOIN subjects sub ON m.subject_id = sub.id "
+                      "WHERE m.student_id = ?");
+        query.addBindValue(userStudentId);
+        double total = 0;
+        int count = 0;
+        if (query.exec()) {
+            while (query.next()) {
+                int r = table->rowCount();
+                table->insertRow(r);
+                table->setItem(r, 0, new QTableWidgetItem(query.value(0).toString()));
+                double score = query.value(1).toDouble();
+                table->setItem(r, 1, new QTableWidgetItem(QString::number(score, 'f', 1)));
+                table->setItem(r, 2, new QTableWidgetItem(score >= 50 ? "Pass" : "Fail"));
+                total += score;
+                count++;
+            }
+        }
+        averageLabel->setText(count > 0 ? "Cumulative Average: " + QString::number(total/count, 'f', 2) : "No results published.");
     }
 }
 
-void EnrollmentPage::onSearch() {
-    refreshTable(searchSpin->value());
+void EnrollmentPage::onFilter() {
+    if (userRole == "student") return;
+    table->setRowCount(0);
+    int sectionId = sectionFilter->currentData().toInt();
+    int subjectId = subjectFilter->currentData().toInt();
+
+    QSqlQuery query;
+    query.prepare("SELECT s.id, s.fullName, (SELECT score FROM marks WHERE student_id = s.id AND subject_id = ?) as score "
+                  "FROM students s "
+                  "WHERE s.section_id = ?");
+    query.addBindValue(subjectId);
+    query.addBindValue(sectionId);
+
+    if (query.exec()) {
+        while (query.next()) {
+            int r = table->rowCount();
+            table->insertRow(r);
+            table->setItem(r, 0, new QTableWidgetItem(QString::number(query.value(0).toInt())));
+            table->setItem(r, 1, new QTableWidgetItem(query.value(1).toString()));
+            
+            QDoubleSpinBox *spin = new QDoubleSpinBox;
+            spin->setRange(0, 100);
+            spin->setValue(query.value(2).toDouble());
+            table->setCellWidget(r, 2, spin);
+        }
+    }
 }
 
-void EnrollmentPage::refreshTable(int studentId) {
-    QVector<QString> courses = manager.getCoursesForStudent(studentId);
-    table->setRowCount(courses.size());
-    for (int i = 0; i < courses.size(); ++i) {
-        table->setItem(i, 0, new QTableWidgetItem(courses[i]));
+void EnrollmentPage::onSaveAll() {
+    int sectionId = sectionFilter->currentData().toInt();
+    int subjectId = subjectFilter->currentData().toInt();
+    int yearId = 1; 
+
+    for (int i = 0; i < table->rowCount(); ++i) {
+        int sid = table->item(i, 0)->text().toInt();
+        QDoubleSpinBox *spin = qobject_cast<QDoubleSpinBox*>(table->cellWidget(i, 2));
+        if (spin) {
+            manager.setMark(sid, subjectId, sectionId, yearId, spin->value());
+        }
     }
+    QMessageBox::information(this, "Success", "All student marks have been saved.");
 }

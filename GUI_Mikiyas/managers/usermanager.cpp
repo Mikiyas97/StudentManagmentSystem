@@ -48,38 +48,31 @@ int UserManager::generateNextTeacherId() const {
 
 bool UserManager::addTeacher(const Teacher &t, const QString &password) {
     QSqlQuery q;
-    q.prepare("INSERT INTO teachers (id, fullName, courseCode, phone, email) VALUES (?, ?, ?, ?, ?)");
+    q.prepare("INSERT INTO teachers (id, fullName, phone, email) VALUES (?, ?, ?, ?)");
     q.addBindValue(t.id);
     q.addBindValue(t.fullName);
-    q.addBindValue(t.courseCode);
     q.addBindValue(t.phone);
     q.addBindValue(t.email);
     if (q.exec()) {
         User u;
-        u.username = QString::number(t.id); // username is teacher ID
+        u.username = QString::number(t.id);
         u.password = password;
         u.role = "teacher";
         u.relatedId = t.id;
-        if (!addUser(u)) {
-            qDebug() << "Failed to add user for teacher:" << q.lastError().text();
-            return false;
-        }
-        return true;
+        return addUser(u);
     }
-    qDebug() << "Failed to add teacher to teachers table:" << q.lastError().text();
     return false;
 }
 
 QVector<Teacher> UserManager::getTeachers() const {
     QVector<Teacher> list;
-    QSqlQuery q("SELECT id, fullName, courseCode, phone, email FROM teachers");
+    QSqlQuery q("SELECT id, fullName, phone, email FROM teachers");
     while (q.next()) {
         Teacher t;
         t.id = q.value(0).toInt();
         t.fullName = q.value(1).toString();
-        t.courseCode = q.value(2).toString();
-        t.phone = q.value(3).toString();
-        t.email = q.value(4).toString();
+        t.phone = q.value(2).toString();
+        t.email = q.value(3).toString();
         list.push_back(t);
     }
     return list;
@@ -89,14 +82,13 @@ Teacher UserManager::getTeacherById(int id) const {
     Teacher t;
     t.id = -1;
     QSqlQuery q;
-    q.prepare("SELECT id, fullName, courseCode, phone, email FROM teachers WHERE id = ?");
+    q.prepare("SELECT id, fullName, phone, email FROM teachers WHERE id = ?");
     q.addBindValue(id);
     if (q.exec() && q.next()) {
         t.id = q.value(0).toInt();
         t.fullName = q.value(1).toString();
-        t.courseCode = q.value(2).toString();
-        t.phone = q.value(3).toString();
-        t.email = q.value(4).toString();
+        t.phone = q.value(2).toString();
+        t.email = q.value(3).toString();
     }
     return t;
 }

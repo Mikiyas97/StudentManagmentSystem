@@ -25,18 +25,15 @@ int StudentManager::generateNextId() const {
 
 bool StudentManager::addStudent(const Student &s) {
     QSqlQuery query;
-    query.prepare("INSERT INTO students (id, fullName, age, gender, className, phone, email, address, guardianName, guardianContact, status) "
-                  "VALUES (:id, :name, :age, :gender, :class, :phone, :email, :addr, :gname, :gphone, :status)");
+    query.prepare("INSERT INTO students (id, fullName, grade_id, section_id, stream_id, phone, email, status) "
+                  "VALUES (:id, :name, :grade, :section, :stream, :phone, :email, :status)");
     query.bindValue(":id", s.id);
     query.bindValue(":name", s.fullName);
-    query.bindValue(":age", s.age);
-    query.bindValue(":gender", s.gender);
-    query.bindValue(":class", s.className);
+    query.bindValue(":grade", s.grade_id);
+    query.bindValue(":section", s.section_id);
+    query.bindValue(":stream", s.stream_id > 0 ? QVariant(s.stream_id) : QVariant(QVariant::Int));
     query.bindValue(":phone", s.phone);
     query.bindValue(":email", s.email);
-    query.bindValue(":addr", s.address);
-    query.bindValue(":gname", s.guardianName);
-    query.bindValue(":gphone", s.guardianContact);
     query.bindValue(":status", s.status);
     if (query.exec()) {
         UserManager um;
@@ -53,18 +50,15 @@ bool StudentManager::addStudent(const Student &s) {
 
 bool StudentManager::updateStudent(const Student &s) {
     QSqlQuery query;
-    query.prepare("UPDATE students SET fullName=:name, age=:age, gender=:gender, className=:class, phone=:phone, "
-                  "email=:email, address=:addr, guardianName=:gname, guardianContact=:gphone, status=:status WHERE id=:id");
+    query.prepare("UPDATE students SET fullName=:name, grade_id=:grade, section_id=:section, stream_id=:stream, phone=:phone, "
+                  "email=:email, status=:status WHERE id=:id");
     query.bindValue(":id", s.id);
     query.bindValue(":name", s.fullName);
-    query.bindValue(":age", s.age);
-    query.bindValue(":gender", s.gender);
-    query.bindValue(":class", s.className);
+    query.bindValue(":grade", s.grade_id);
+    query.bindValue(":section", s.section_id);
+    query.bindValue(":stream", s.stream_id > 0 ? QVariant(s.stream_id) : QVariant(QVariant::Int));
     query.bindValue(":phone", s.phone);
     query.bindValue(":email", s.email);
-    query.bindValue(":addr", s.address);
-    query.bindValue(":gname", s.guardianName);
-    query.bindValue(":gphone", s.guardianContact);
     query.bindValue(":status", s.status);
     return query.exec();
 }
@@ -101,12 +95,13 @@ void StudentManager::bulkHardDelete(const QVector<int> &ids) {
     }
 }
 
-void StudentManager::bulkAssignClass(const QVector<int> &ids, const QString &cls) {
+void StudentManager::bulkAssignClass(const QVector<int> &ids, const QString &sectionIdStr) {
     QSqlQuery query;
-    query.prepare("UPDATE students SET className=:class WHERE id=:id");
+    query.prepare("UPDATE students SET section_id=:sec WHERE id=:id");
+    int secId = sectionIdStr.toInt();
     for (int id : ids) {
         query.bindValue(":id", id);
-        query.bindValue(":class", cls);
+        query.bindValue(":sec", secId);
         query.exec();
     }
 }
@@ -117,28 +112,37 @@ static Student parseStudent(QSqlQuery &q) {
     Student s;
     s.id = q.value("id").toInt();
     s.fullName = q.value("fullName").toString();
-    s.age = q.value("age").toInt();
-    s.gender = q.value("gender").toString();
-    s.className = q.value("className").toString();
+    s.grade_id = q.value("grade_id").toInt();
+    s.gradeName = q.value("grade_name").toString();
+    s.section_id = q.value("section_id").toInt();
+    s.sectionName = q.value("section_name").toString();
+    s.stream_id = q.value("stream_id").toInt();
+    s.streamName = q.value("stream_name").toString();
     s.phone = q.value("phone").toString();
     s.email = q.value("email").toString();
-    s.address = q.value("address").toString();
-    s.guardianName = q.value("guardianName").toString();
-    s.guardianContact = q.value("guardianContact").toString();
     s.status = q.value("status").toString();
     return s;
 }
 
 QVector<Student> StudentManager::getStudents() const {
     QVector<Student> list;
-    QSqlQuery query("SELECT * FROM students");
+    QSqlQuery query("SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
+                   "FROM students s "
+                   "LEFT JOIN grade_levels g ON s.grade_id = g.id "
+                   "LEFT JOIN sections sec ON s.section_id = sec.id "
+                   "LEFT JOIN streams st ON s.stream_id = st.id");
     while (query.next()) list.push_back(parseStudent(query));
     return list;
 }
 
 Student StudentManager::getStudentById(int id) const {
     QSqlQuery query;
-    query.prepare("SELECT * FROM students WHERE id=:id");
+    query.prepare("SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
+                  "FROM students s "
+                  "LEFT JOIN grade_levels g ON s.grade_id = g.id "
+                  "LEFT JOIN sections sec ON s.section_id = sec.id "
+                  "LEFT JOIN streams st ON s.stream_id = st.id "
+                  "WHERE s.id=:id");
     query.bindValue(":id", id);
     if (query.exec() && query.next()) {
         return parseStudent(query);
@@ -147,26 +151,31 @@ Student StudentManager::getStudentById(int id) const {
 }
 
 QVector<Student> StudentManager::filter(const QString &nameOrId,
-                                         const QString &classFilter,
+                                         const QString &gradeFilter,
                                          const QString &statusFilter) const {
-    QString sql = "SELECT * FROM students WHERE 1=1";
+    QString sql = "SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
+                  "FROM students s "
+                  "LEFT JOIN grade_levels g ON s.grade_id = g.id "
+                  "LEFT JOIN sections sec ON s.section_id = sec.id "
+                  "LEFT JOIN streams st ON s.stream_id = st.id "
+                  "WHERE 1=1";
     
     if (!nameOrId.isEmpty()) {
-        sql += " AND (id LIKE '%" + nameOrId + "%' OR fullName LIKE '%" + nameOrId + "%')";
+        sql += " AND (s.id LIKE '%" + nameOrId + "%' OR s.fullName LIKE '%" + nameOrId + "%')";
     }
-    if (!classFilter.isEmpty() && classFilter != "All") {
-        sql += " AND className = '" + classFilter + "'";
+    if (!gradeFilter.isEmpty() && gradeFilter != "All") {
+        sql += " AND g.name = '" + gradeFilter + "'";
     }
     if (!statusFilter.isEmpty() && statusFilter != "All") {
-        sql += " AND status = '" + statusFilter + "'";
+        sql += " AND s.status = '" + statusFilter + "'";
     }
     
     if (currentSortField == ByName) {
-        sql += " ORDER BY fullName " + QString(currentSortAscending ? "ASC" : "DESC");
+        sql += " ORDER BY s.fullName " + QString(currentSortAscending ? "ASC" : "DESC");
     } else if (currentSortField == ByClass) {
-        sql += " ORDER BY className " + QString(currentSortAscending ? "ASC" : "DESC");
+        sql += " ORDER BY sec.name " + QString(currentSortAscending ? "ASC" : "DESC");
     } else {
-        sql += " ORDER BY id " + QString(currentSortAscending ? "ASC" : "DESC");
+        sql += " ORDER BY s.id " + QString(currentSortAscending ? "ASC" : "DESC");
     }
 
     QVector<Student> list;
@@ -176,17 +185,8 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
 }
 
 QVector<Student> StudentManager::getStudentsByCourse(const QString &courseCode) const {
+    // This needs to be refactored to getStudentsBySection or similar
     QVector<Student> list;
-    QSqlQuery query;
-    query.prepare("SELECT s.* FROM students s "
-                  "JOIN enrollments e ON s.id = e.studentId "
-                  "WHERE e.courseCode = ?");
-    query.addBindValue(courseCode);
-    if (query.exec()) {
-        while (query.next()) {
-            list.push_back(parseStudent(query));
-        }
-    }
     return list;
 }
 

@@ -23,14 +23,11 @@ private:
     bool editing;
     QSpinBox    *idSpin;
     QLineEdit   *nameEdit;
-    QSpinBox    *ageSpin;
-    QComboBox   *genderCombo;
-    QLineEdit   *classEdit;
+    QComboBox   *gradeCombo;
+    QComboBox   *sectionCombo;
+    QComboBox   *streamCombo;
     QLineEdit   *phoneEdit;
     QLineEdit   *emailEdit;
-    QTextEdit   *addressEdit;
-    QLineEdit   *guardianEdit;
-    QLineEdit   *guardianPhoneEdit;
     QComboBox   *statusCombo;
     Student      result;
 };

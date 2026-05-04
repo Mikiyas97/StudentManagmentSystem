@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QLineEdit>
-#include <QSpinBox>
-#include "../managers/coursemanager.h"
+#include <QComboBox>
+#include "../managers/subjectmanager.h"
 
 class CoursePage : public QWidget {
     Q_OBJECT
@@ -14,14 +14,15 @@ public:
 
 private slots:
     void onAdd();
+    void onDelete();
     void refreshTable();
 
 private:
-    CourseManager manager;
+    SubjectManager manager;
     QTableWidget *table;
-    QLineEdit *idEdit;
     QLineEdit *nameEdit;
-    QSpinBox *creditsSpin;
+    QComboBox *gradeCombo;
+    QComboBox *streamCombo;
 };
 
 #endif // COURSEPAGE_H

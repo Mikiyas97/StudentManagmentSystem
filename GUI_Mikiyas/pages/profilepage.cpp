@@ -36,7 +36,6 @@ void ProfilePage::setupTeacherProfile(int id) {
     QFormLayout *form = new QFormLayout(box);
     form->addRow("Teacher ID:", new QLabel(QString::number(t.id)));
     form->addRow("Full Name:", new QLabel(t.fullName));
-    form->addRow("Assigned Course:", new QLabel(t.courseCode));
     form->addRow("Phone:", new QLabel(t.phone));
     form->addRow("Email:", new QLabel(t.email));
     layout()->addWidget(box);
@@ -50,7 +49,9 @@ void ProfilePage::setupStudentProfile(int id) {
     QFormLayout *form = new QFormLayout(box);
     form->addRow("Student ID:", new QLabel(QString::number(s.id)));
     form->addRow("Full Name:", new QLabel(s.fullName));
-    form->addRow("Class:", new QLabel(s.className));
+    form->addRow("Grade:", new QLabel(s.gradeName));
+    form->addRow("Section:", new QLabel(s.sectionName));
+    form->addRow("Stream:", new QLabel(s.streamName.isEmpty() ? "General" : s.streamName));
     form->addRow("Phone:", new QLabel(s.phone));
     form->addRow("Email:", new QLabel(s.email));
     form->addRow("Status:", new QLabel(s.status));
