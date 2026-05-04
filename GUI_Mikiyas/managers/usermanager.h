@@ -31,6 +31,7 @@ public:
     int generateNextTeacherId() const;
     bool addTeacher(const Teacher &t, const QString &password);
     QVector<Teacher> getTeachers() const;
+    QVector<Teacher> filterTeachers(const QString &searchText, const QString &sortBy = "") const;
     Teacher getTeacherById(int id) const;
 };
 

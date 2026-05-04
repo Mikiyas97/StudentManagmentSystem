@@ -1,13 +1,12 @@
 #include "teacherpage.h"
+#include "teacherformdialog.h"
+#include "teacherdetaildialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGroupBox>
 #include <QPushButton>
 #include <QLabel>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QSqlQuery>
-#include <QSqlError>
 #include "../managers/subjectmanager.h"
 
 TeacherPage::TeacherPage(QWidget *parent) : QWidget(parent) {
@@ -15,89 +14,94 @@ TeacherPage::TeacherPage(QWidget *parent) : QWidget(parent) {
     layout->setSpacing(15);
     layout->setContentsMargins(25, 20, 25, 20);
 
-    QLabel *title = new QLabel("Teachers Management");
-    title->setObjectName("pageTitle");
-    layout->addWidget(title);
-
-    // Add Teacher Group
-    QGroupBox *addGroup = new QGroupBox("Add New Teacher & Assign Subject");
-    QHBoxLayout *addLayout = new QHBoxLayout(addGroup);
+    // --- Header ---
+    QHBoxLayout *headerLayout = new QHBoxLayout;
+    // --- Toolbar ---
+    QHBoxLayout *toolbar = new QHBoxLayout;
     
-    nameEdit = new QLineEdit; nameEdit->setPlaceholderText("Full Name");
+    searchEdit = new QLineEdit;
+    searchEdit->setPlaceholderText("Search by Name, Phone, or Email...");
+    searchEdit->setFixedWidth(300);
+    searchEdit->setStyleSheet("padding: 8px; border-radius: 4px; background: #16213e; color: white; border: 1px solid #1f4068;");
+    connect(searchEdit, &QLineEdit::textChanged, this, &TeacherPage::refreshTable);
     
-    subjectCombo = new QComboBox;
-    QSqlQuery sq("SELECT id, name FROM subjects");
-    while (sq.next()) subjectCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+    toolbar->addWidget(new QLabel("🔍"));
+    toolbar->addWidget(searchEdit);
+    toolbar->addSpacing(20);
     
-    sectionCombo = new QComboBox;
-    QSqlQuery secq("SELECT id, name FROM sections");
-    while (secq.next()) sectionCombo->addItem(secq.value("name").toString(), secq.value("id").toInt());
-
-    phoneEdit = new QLineEdit; phoneEdit->setPlaceholderText("Phone");
-    emailEdit = new QLineEdit; emailEdit->setPlaceholderText("Email");
+    toolbar->addWidget(new QLabel("Sort By:"));
+    sortCombo = new QComboBox;
+    sortCombo->addItem("ID Asc", "id ASC");
+    sortCombo->addItem("ID Desc", "id DESC");
+    sortCombo->addItem("Name A-Z", "fullName ASC");
+    sortCombo->addItem("Name Z-A", "fullName DESC");
+    sortCombo->setStyleSheet("padding: 5px; border-radius: 4px; background: #16213e; color: white;");
+    connect(sortCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TeacherPage::onSortChanged);
+    toolbar->addWidget(sortCombo);
     
-    addLayout->addWidget(nameEdit);
-    addLayout->addWidget(new QLabel("Subject:"));
-    addLayout->addWidget(subjectCombo);
-    addLayout->addWidget(new QLabel("Section:"));
-    addLayout->addWidget(sectionCombo);
-    addLayout->addWidget(phoneEdit);
-    addLayout->addWidget(emailEdit);
+    toolbar->addStretch();
     
-    QPushButton *addBtn = new QPushButton("Register Teacher");
+    QPushButton *addBtn = new QPushButton("Register New Teacher");
+    addBtn->setStyleSheet("background-color: #e94560; color: white; padding: 8px 15px; font-weight: bold; border-radius: 4px;");
     addBtn->setCursor(Qt::PointingHandCursor);
-    addLayout->addWidget(addBtn);
-    layout->addWidget(addGroup);
-
     connect(addBtn, &QPushButton::clicked, this, &TeacherPage::onAddTeacher);
+    toolbar->addWidget(addBtn);
+    
+    layout->addLayout(toolbar);
 
-    // Table
+    // --- Table ---
     table = new QTableWidget;
     table->setColumnCount(4);
     table->setHorizontalHeaderLabels({"ID", "Full Name", "Phone", "Email"});
     table->horizontalHeader()->setStretchLastSection(true);
     table->setAlternatingRowColors(true);
     table->verticalHeader()->setVisible(false);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    connect(table, &QTableWidget::cellDoubleClicked, this, &TeacherPage::onRowDoubleClicked);
+    
     layout->addWidget(table, 1);
 
     refreshTable();
 }
 
 void TeacherPage::onAddTeacher() {
-    QString name = nameEdit->text().trimmed();
-    QString phone = phoneEdit->text().trimmed();
-    QString email = emailEdit->text().trimmed();
+    TeacherFormDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        Teacher t = dialog.getTeacher();
+        t.id = manager.generateNextTeacherId();
+        QString pass = "pass" + QString::number(t.id);
 
-    if (name.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Teacher name is required.");
-        return;
-    }
+        if (manager.addTeacher(t, pass)) {
+            // Handle Assignment
+            SubjectManager sm;
+            sm.assignTeacherToSubject(t.id, dialog.getSubjectId(), dialog.getSectionId(), 1);
 
-    Teacher t;
-    t.id = manager.generateNextTeacherId();
-    QString pass = "pass" + QString::number(t.id); // Corrected password pattern
-    
-    t.fullName = name;
-    t.phone = phone;
-    t.email = email;
-
-    if (manager.addTeacher(t, pass)) {
-        // Handle Assignment
-        int subId = subjectCombo->currentData().toInt();
-        int secId = sectionCombo->currentData().toInt();
-        SubjectManager sm;
-        sm.assignTeacherToSubject(t.id, subId, secId, 1); // Using default year ID 1
-
-        QMessageBox::information(this, "Success", "Teacher Registered!\nID: " + QString::number(t.id) + "\nPassword: " + pass);
-        nameEdit->clear(); phoneEdit->clear(); emailEdit->clear();
-        refreshTable();
-    } else {
-        QMessageBox::warning(this, "Error", "Failed to add teacher. Check database connection.");
+            QMessageBox::information(this, "Success", "Teacher Registered!\nID: " + QString::number(t.id) + "\nPassword: " + pass);
+            refreshTable();
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to add teacher.");
+        }
     }
 }
 
+void TeacherPage::onRowDoubleClicked(int row, int column) {
+    int id = table->item(row, 0)->text().toInt();
+    Teacher t = manager.getTeacherById(id);
+    if (t.id != -1) {
+        TeacherDetailDialog dialog(t, this);
+        dialog.exec();
+    }
+}
+
+void TeacherPage::onSortChanged(int /*index*/) {
+    refreshTable();
+}
+
 void TeacherPage::refreshTable() {
-    QVector<Teacher> teachers = manager.getTeachers();
+    QString sortBy = sortCombo ? sortCombo->currentData().toString() : "";
+    QVector<Teacher> teachers = manager.filterTeachers(searchEdit->text().trimmed(), sortBy);
     table->setRowCount(teachers.size());
     for (int i = 0; i < teachers.size(); ++i) {
         table->setItem(i, 0, new QTableWidgetItem(QString::number(teachers[i].id)));

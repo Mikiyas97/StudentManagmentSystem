@@ -64,8 +64,8 @@ void MainWindow::setupUI() {
 
     // Nav buttons based on role
     if (userRole == "admin") {
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 0));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 1));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 1));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Subjects"), 2));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\xAB  Sections"), 3));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Marks"), 4));
@@ -149,8 +149,8 @@ void MainWindow::setupUI() {
     stack->setObjectName("contentArea");
 
     if (userRole == "admin") {
-        stack->addWidget(new TeacherPage);         // 0
-        stack->addWidget(new StudentPage("admin"));// 1
+        stack->addWidget(new StudentPage("admin"));// 0
+        stack->addWidget(new TeacherPage);         // 1
         stack->addWidget(new CoursePage);          // 2 (SubjectPage)
         stack->addWidget(new OfferingPage);        // 3 (SectionPage)
         stack->addWidget(new EnrollmentPage("admin")); // 4 (MarkEntry)

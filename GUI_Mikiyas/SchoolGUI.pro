@@ -22,6 +22,8 @@ SOURCES += main.cpp \
            pages/coursepage.cpp \
            pages/reportpage.cpp \
            pages/teacherpage.cpp \
+           pages/teacherformdialog.cpp \
+           pages/teacherdetaildialog.cpp \
            pages/enrollmentpage.cpp \
            pages/offeringpage.cpp \
            pages/profilepage.cpp
@@ -44,6 +46,8 @@ HEADERS += mainwindow.h \
            pages/coursepage.h \
            pages/reportpage.h \
            pages/teacherpage.h \
+           pages/teacherformdialog.h \
+           pages/teacherdetaildialog.h \
            pages/enrollmentpage.h \
            pages/offeringpage.h \
            pages/profilepage.h

@@ -3,8 +3,9 @@
 
 #include <QWidget>
 #include <QTableWidget>
-#include <QComboBox>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
 #include "managers/usermanager.h"
 
 class TeacherPage : public QWidget {
@@ -14,15 +15,14 @@ public:
 
 private slots:
     void onAddTeacher();
+    void onRowDoubleClicked(int row, int column);
+    void onSortChanged(int index);
     void refreshTable();
 
 private:
     QTableWidget *table;
-    QLineEdit *nameEdit;
-    QComboBox *subjectCombo;
-    QComboBox *sectionCombo;
-    QLineEdit *phoneEdit;
-    QLineEdit *emailEdit;
+    QLineEdit *searchEdit;
+    QComboBox *sortCombo;
     UserManager manager;
 };
 

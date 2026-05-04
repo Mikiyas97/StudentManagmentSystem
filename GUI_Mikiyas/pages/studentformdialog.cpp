@@ -39,7 +39,7 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
     aLayout->addRow("Full Name:", nameEdit);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY name ASC");
+    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
     while (gq.next()) {
         gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
     }

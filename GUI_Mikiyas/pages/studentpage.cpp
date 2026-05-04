@@ -165,7 +165,7 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget
 
 QStringList StudentPage::getUniqueClasses() const {
     QStringList grades;
-    QSqlQuery query("SELECT name FROM grade_levels ORDER BY name ASC");
+    QSqlQuery query("SELECT name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
     while (query.next()) grades << query.value(0).toString();
     return grades;
 }

@@ -78,6 +78,39 @@ QVector<Teacher> UserManager::getTeachers() const {
     return list;
 }
 
+QVector<Teacher> UserManager::filterTeachers(const QString &searchText, const QString &sortBy) const {
+    QVector<Teacher> list;
+    QSqlQuery q;
+    QString queryStr = "SELECT id, fullName, phone, email FROM teachers";
+    if (!searchText.isEmpty()) {
+        queryStr += " WHERE fullName LIKE ? OR phone LIKE ? OR email LIKE ?";
+    }
+    
+    if (!sortBy.isEmpty()) {
+        queryStr += " ORDER BY " + sortBy;
+    }
+    
+    q.prepare(queryStr);
+    if (!searchText.isEmpty()) {
+        QString likeStr = "%" + searchText + "%";
+        q.addBindValue(likeStr);
+        q.addBindValue(likeStr);
+        q.addBindValue(likeStr);
+    }
+    
+    if (q.exec()) {
+        while (q.next()) {
+            Teacher t;
+            t.id = q.value(0).toInt();
+            t.fullName = q.value(1).toString();
+            t.phone = q.value(2).toString();
+            t.email = q.value(3).toString();
+            list.push_back(t);
+        }
+    }
+    return list;
+}
+
 Teacher UserManager::getTeacherById(int id) const {
     Teacher t;
     t.id = -1;

@@ -25,7 +25,7 @@ OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     inputLayout->setContentsMargins(0, 0, 0, 0);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY name ASC");
+    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
     while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
     inputLayout->addWidget(new QLabel("Grade:"));
     inputLayout->addWidget(gradeCombo);
