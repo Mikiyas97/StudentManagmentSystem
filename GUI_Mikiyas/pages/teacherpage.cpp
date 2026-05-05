@@ -101,15 +101,22 @@ TeacherPage::TeacherPage(QWidget *parent) : QWidget(parent) {
     table = new QTableWidget;
     table->setColumnCount(6);
     table->setHorizontalHeaderLabels({"", "ID", "Full Name", "Phone", "Email", "Actions"});
-    table->horizontalHeader()->setStretchLastSection(true);
-    table->setColumnWidth(0, 35);
-    table->setColumnWidth(1, 70);
-    table->setColumnWidth(2, 200);
+    table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
+    table->setColumnWidth(0, 40);
+    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+    table->setColumnWidth(1, 60);
+    table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+    table->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
+    table->setColumnWidth(5, 160);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setAlternatingRowColors(true);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table->verticalHeader()->setVisible(false);
+    table->verticalHeader()->setDefaultSectionSize(45); // Set consistent row height
+    table->setStyleSheet("QTableWidget::item { padding: 5px; }");
     
     connect(table, &QTableWidget::cellDoubleClicked, this, &TeacherPage::onRowDoubleClicked);
     
@@ -219,6 +226,7 @@ void TeacherPage::refreshTable() {
 
         // Checkbox
         QWidget *cbContainer = new QWidget;
+        cbContainer->setStyleSheet("background: transparent;"); // Allow row highlight to show
         QHBoxLayout *cbLayout = new QHBoxLayout(cbContainer);
         cbLayout->setContentsMargins(0, 0, 0, 0);
         cbLayout->setAlignment(Qt::AlignCenter);
@@ -234,9 +242,11 @@ void TeacherPage::refreshTable() {
 
         // Action buttons
         QWidget *actWidget = new QWidget;
+        actWidget->setStyleSheet("background: transparent;"); // Allow row highlight to show
         QHBoxLayout *actLayout = new QHBoxLayout(actWidget);
-        actLayout->setContentsMargins(2, 2, 2, 2);
-        actLayout->setSpacing(4);
+        actLayout->setContentsMargins(5, 2, 5, 2);
+        actLayout->setSpacing(25);
+        actLayout->setAlignment(Qt::AlignCenter);
 
         QPushButton *viewBtn = new QPushButton("View");
         viewBtn->setFixedSize(50, 26);

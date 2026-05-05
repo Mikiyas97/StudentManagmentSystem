@@ -2,11 +2,8 @@ debug/main.o
 debug/mainwindow.o
 debug/logindialog.o
 debug/studentmanager.o
-debug/grademanager.o
-debug/coursemanager.o
 debug/reportmanager.o
 debug/usermanager.o
-debug/enrollmentmanager.o
 debug/sectionmanager.o
 debug/subjectmanager.o
 debug/markmanager.o

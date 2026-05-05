@@ -16,6 +16,8 @@ TeacherDetailDialog::TeacherDetailDialog(const Teacher &t, QWidget *parent) : QD
 
     QFormLayout *form = new QFormLayout;
     form->addRow("Teacher ID:", new QLabel(QString::number(t.id)));
+    form->addRow("Gender:", new QLabel(t.gender.isEmpty() ? "Not Set" : t.gender));
+    form->addRow("Date of Birth:", new QLabel(t.dateOfBirth.isEmpty() ? "Not Set" : t.dateOfBirth));
     form->addRow("Phone:", new QLabel(t.phone));
     form->addRow("Email:", new QLabel(t.email));
     

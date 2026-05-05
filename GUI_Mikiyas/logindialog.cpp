@@ -9,7 +9,8 @@ LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent), studentId(-1)
 {
     setWindowTitle("School Management System");
-    setFixedSize(420, 480);
+    setMinimumSize(500, 520);
+    resize(500, 520);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setAlignment(Qt::AlignCenter);
@@ -21,9 +22,18 @@ LoginDialog::LoginDialog(QWidget *parent)
     iconLabel->setAlignment(Qt::AlignCenter);
     iconLabel->setStyleSheet("font-size: 48px; background: transparent; margin-bottom: 5px;");
 
-    QLabel *titleLabel = new QLabel("School Management\nSystem");
-    titleLabel->setAlignment(Qt::AlignCenter);
-    titleLabel->setStyleSheet(
+    QLabel *titleLabel1 = new QLabel("School Management");
+    titleLabel1->setAlignment(Qt::AlignCenter);
+    titleLabel1->setWordWrap(true);
+    titleLabel1->setStyleSheet(
+        "font-size: 22px; font-weight: bold; color: #e94560;"
+        "background: transparent; margin-top: 5px;"
+    );
+    
+    QLabel *titleLabel2 = new QLabel("System");
+    titleLabel2->setAlignment(Qt::AlignCenter);
+    titleLabel2->setWordWrap(true);
+    titleLabel2->setStyleSheet(
         "font-size: 22px; font-weight: bold; color: #e94560;"
         "background: transparent; margin-bottom: 25px;"
     );
@@ -77,7 +87,8 @@ LoginDialog::LoginDialog(QWidget *parent)
     hintLabel->setStyleSheet("color: #444; font-size: 11px; margin-top: 15px; background: transparent;");
 
     mainLayout->addWidget(iconLabel);
-    mainLayout->addWidget(titleLabel);
+    mainLayout->addWidget(titleLabel1);
+    mainLayout->addWidget(titleLabel2);
     mainLayout->addWidget(card);
     mainLayout->addWidget(hintLabel);
 

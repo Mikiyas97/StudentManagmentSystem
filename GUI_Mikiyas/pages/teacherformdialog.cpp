@@ -14,6 +14,13 @@ TeacherFormDialog::TeacherFormDialog(QWidget *parent) : QDialog(parent) {
     QFormLayout *form = new QFormLayout;
 
     nameEdit = new QLineEdit;
+    
+    genderCombo = new QComboBox;
+    genderCombo->addItems(QStringList() << "Male" << "Female");
+    
+    dobEdit = new QLineEdit;
+    dobEdit->setPlaceholderText("DD/MM/YYYY");
+    
     phoneEdit = new QLineEdit;
     emailEdit = new QLineEdit;
     
@@ -22,6 +29,8 @@ TeacherFormDialog::TeacherFormDialog(QWidget *parent) : QDialog(parent) {
     while (sq.next()) subjectCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
 
     form->addRow("Full Name:", nameEdit);
+    form->addRow("Gender:", genderCombo);
+    form->addRow("Date of Birth:", dobEdit);
     form->addRow("Phone:", phoneEdit);
     form->addRow("Email:", emailEdit);
     form->addRow("Subject Specialization:", subjectCombo);
@@ -41,6 +50,8 @@ void TeacherFormDialog::onSave() {
     }
 
     resultTeacher.fullName = nameEdit->text().trimmed();
+    resultTeacher.gender = genderCombo->currentText();
+    resultTeacher.dateOfBirth = dobEdit->text().trimmed();
     resultTeacher.phone = phoneEdit->text().trimmed();
     resultTeacher.email = emailEdit->text().trimmed();
     resultTeacher.subject_id = subjectCombo->currentData().toInt();

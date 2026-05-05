@@ -30,8 +30,14 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
 
     idSpin = new QSpinBox;
     idSpin->setRange(1, 9999999);
-    idSpin->setValue(s.id > 0 ? s.id : 1);
-    if (editing) idSpin->setReadOnly(true);
+    if (editing) {
+        idSpin->setValue(s.id);
+        idSpin->setReadOnly(true);
+    } else {
+        StudentManager tempMgr;
+        idSpin->setValue(tempMgr.generateNextId());
+        idSpin->setReadOnly(true);
+    }
     aLayout->addRow("Student ID:", idSpin);
 
     nameEdit = new QLineEdit(s.fullName);

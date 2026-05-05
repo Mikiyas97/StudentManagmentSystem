@@ -2,11 +2,8 @@ release/main.o
 release/mainwindow.o
 release/logindialog.o
 release/studentmanager.o
-release/grademanager.o
-release/coursemanager.o
 release/reportmanager.o
 release/usermanager.o
-release/enrollmentmanager.o
 release/sectionmanager.o
 release/subjectmanager.o
 release/markmanager.o

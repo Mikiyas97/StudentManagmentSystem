@@ -58,8 +58,22 @@ QVector<Section> SectionManager::getAllSections() const {
 }
 
 bool SectionManager::deleteSection(int id) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM sections WHERE id = ?");
-    query.addBindValue(id);
-    return query.exec();
+    // Cascade: remove related data first
+    QSqlQuery q;
+    q.prepare("DELETE FROM marks WHERE section_id = ?");
+    q.addBindValue(id); q.exec();
+
+    q.prepare("DELETE FROM teaching_assignments WHERE section_id = ?");
+    q.addBindValue(id); q.exec();
+
+    q.prepare("DELETE FROM ranking_approvals WHERE section_id = ?");
+    q.addBindValue(id); q.exec();
+
+    // Unassign students from this section
+    q.prepare("UPDATE students SET section_id = NULL WHERE section_id = ?");
+    q.addBindValue(id); q.exec();
+
+    q.prepare("DELETE FROM sections WHERE id = ?");
+    q.addBindValue(id);
+    return q.exec();
 }

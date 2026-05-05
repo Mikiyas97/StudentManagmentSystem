@@ -18,6 +18,8 @@ private slots:
 
 private:
     QLineEdit *nameEdit;
+    QComboBox *genderCombo;
+    QLineEdit *dobEdit;
     QLineEdit *phoneEdit;
     QLineEdit *emailEdit;
     QComboBox *subjectCombo;

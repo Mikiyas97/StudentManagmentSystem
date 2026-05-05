@@ -7,6 +7,8 @@
 struct Teacher {
     int id;
     QString fullName;
+    QString gender;
+    QString dateOfBirth;
     QString phone;
     QString email;
     int subject_id; // Added specialization

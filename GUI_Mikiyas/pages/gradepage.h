@@ -21,8 +21,11 @@ private slots:
 private:
     MarkManager manager;
     QTableWidget *table;
+    QComboBox *gradeCombo;
+    QComboBox *streamCombo;
     QComboBox *sectionCombo;
     QComboBox *yearCombo;
+    QComboBox *semesterCombo;
     QString userRole;
     int userId;
 };

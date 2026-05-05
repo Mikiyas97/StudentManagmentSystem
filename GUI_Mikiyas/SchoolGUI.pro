@@ -7,11 +7,8 @@ SOURCES += main.cpp \
            mainwindow.cpp \
            logindialog.cpp \
            managers/studentmanager.cpp \
-           managers/grademanager.cpp \
-           managers/coursemanager.cpp \
            managers/reportmanager.cpp \
            managers/usermanager.cpp \
-           managers/enrollmentmanager.cpp \
            managers/sectionmanager.cpp \
            managers/subjectmanager.cpp \
            managers/markmanager.cpp \
@@ -32,11 +29,8 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
            logindialog.h \
            managers/studentmanager.h \
-           managers/grademanager.h \
-           managers/coursemanager.h \
            managers/reportmanager.h \
            managers/usermanager.h \
-           managers/enrollmentmanager.h \
            managers/sectionmanager.h \
            managers/subjectmanager.h \
            managers/markmanager.h \

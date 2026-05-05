@@ -21,17 +21,56 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     // --- Controls ---
     QHBoxLayout *controls = new QHBoxLayout;
     
+    // Grade Filter
+    gradeCombo = new QComboBox;
+    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
+    while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    controls->addWidget(new QLabel("Grade:"));
+    controls->addWidget(gradeCombo);
+
+    // Stream Filter (enabled only for Grade 11/12)
+    streamCombo = new QComboBox;
+    streamCombo->addItem("General", 0);
+    QSqlQuery stq("SELECT id, name FROM streams");
+    while (stq.next()) streamCombo->addItem(stq.value("name").toString(), stq.value("id").toInt());
+    controls->addWidget(new QLabel("Stream:"));
+    controls->addWidget(streamCombo);
+
+    // Section Filter (dynamic based on Grade)
     sectionCombo = new QComboBox;
-    QSqlQuery sq("SELECT id, name FROM sections");
-    while (sq.next()) sectionCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
     controls->addWidget(new QLabel("Section:"));
     controls->addWidget(sectionCombo);
 
+    // Update logic
+    auto updateSections = [this]() {
+        sectionCombo->clear();
+        int gradeId = gradeCombo->currentData().toInt();
+        QSqlQuery sq;
+        sq.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
+        sq.addBindValue(gradeId);
+        if (sq.exec()) {
+            while (sq.next()) sectionCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+        }
+        
+        QString gradeText = gradeCombo->currentText();
+        bool needsStream = (gradeText == "11" || gradeText == "12");
+        streamCombo->setEnabled(needsStream);
+        if (!needsStream) streamCombo->setCurrentIndex(0);
+    };
+    connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
+    updateSections(); // Initial load
+
     yearCombo = new QComboBox;
-    QSqlQuery yq("SELECT id, name FROM academic_years");
+    QSqlQuery yq("SELECT id, name FROM academic_years ORDER BY name DESC");
     while (yq.next()) yearCombo->addItem(yq.value("name").toString(), yq.value("id").toInt());
     controls->addWidget(new QLabel("Year:"));
     controls->addWidget(yearCombo);
+
+    semesterCombo = new QComboBox;
+    semesterCombo->addItem("Semester 1", 1);
+    semesterCombo->addItem("Semester 2", 2);
+    controls->addWidget(new QLabel("Semester:"));
+    controls->addWidget(semesterCombo);
 
     QPushButton *calcBtn = new QPushButton("Generate Ranking");
     calcBtn->setStyleSheet("background-color: #3498db; color: white;");
@@ -65,8 +104,9 @@ void GradePage::onCalculate() {
     table->setRowCount(0);
     int sectionId = sectionCombo->currentData().toInt();
     int yearId = yearCombo->currentData().toInt();
+    int semester = semesterCombo->currentData().toInt();
 
-    QVector<RankInfo> rankings = manager.calculateSectionRanking(sectionId, yearId);
+    QVector<RankInfo> rankings = manager.calculateSectionRanking(sectionId, yearId, semester);
     
     for (const auto &info : rankings) {
         int r = table->rowCount();
@@ -87,11 +127,13 @@ void GradePage::onCalculate() {
 void GradePage::onApprove() {
     int sectionId = sectionCombo->currentData().toInt();
     int yearId = yearCombo->currentData().toInt();
+    int semester = semesterCombo->currentData().toInt();
 
     QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, is_approved) VALUES (?, ?, 1)");
+    q.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, semester, is_approved) VALUES (?, ?, ?, 1)");
     q.addBindValue(sectionId);
     q.addBindValue(yearId);
+    q.addBindValue(semester);
     
     if (q.exec()) {
         QMessageBox::information(this, "Success", "Ranking has been approved and is now visible to students.");

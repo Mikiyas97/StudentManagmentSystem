@@ -48,9 +48,11 @@ int UserManager::generateNextTeacherId() const {
 
 bool UserManager::addTeacher(const Teacher &t, const QString &password) {
     QSqlQuery q;
-    q.prepare("INSERT INTO teachers (id, fullName, phone, email, subject_id) VALUES (?, ?, ?, ?, ?)");
+    q.prepare("INSERT INTO teachers (id, fullName, gender, date_of_birth, phone, email, subject_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
     q.addBindValue(t.id);
     q.addBindValue(t.fullName);
+    q.addBindValue(t.gender);
+    q.addBindValue(t.dateOfBirth);
     q.addBindValue(t.phone);
     q.addBindValue(t.email);
     q.addBindValue(t.subject_id);
@@ -67,14 +69,16 @@ bool UserManager::addTeacher(const Teacher &t, const QString &password) {
 
 QVector<Teacher> UserManager::getTeachers() const {
     QVector<Teacher> list;
-    QSqlQuery q("SELECT id, fullName, phone, email, subject_id FROM teachers");
+    QSqlQuery q("SELECT id, fullName, gender, date_of_birth, phone, email, subject_id FROM teachers");
     while (q.next()) {
         Teacher t;
         t.id = q.value(0).toInt();
         t.fullName = q.value(1).toString();
-        t.phone = q.value(2).toString();
-        t.email = q.value(3).toString();
-        t.subject_id = q.value(4).toInt();
+        t.gender = q.value(2).toString();
+        t.dateOfBirth = q.value(3).toString();
+        t.phone = q.value(4).toString();
+        t.email = q.value(5).toString();
+        t.subject_id = q.value(6).toInt();
         list.push_back(t);
     }
     return list;
@@ -83,7 +87,7 @@ QVector<Teacher> UserManager::getTeachers() const {
 QVector<Teacher> UserManager::filterTeachers(const QString &searchText, const QString &sortBy) const {
     QVector<Teacher> list;
     QSqlQuery q;
-    QString queryStr = "SELECT id, fullName, phone, email, subject_id FROM teachers";
+    QString queryStr = "SELECT id, fullName, gender, date_of_birth, phone, email, subject_id FROM teachers";
     if (!searchText.isEmpty()) {
         queryStr += " WHERE fullName LIKE ? OR phone LIKE ? OR email LIKE ?";
     }
@@ -105,9 +109,11 @@ QVector<Teacher> UserManager::filterTeachers(const QString &searchText, const QS
             Teacher t;
             t.id = q.value(0).toInt();
             t.fullName = q.value(1).toString();
-            t.phone = q.value(2).toString();
-            t.email = q.value(3).toString();
-            t.subject_id = q.value(4).toInt();
+            t.gender = q.value(2).toString();
+            t.dateOfBirth = q.value(3).toString();
+            t.phone = q.value(4).toString();
+            t.email = q.value(5).toString();
+            t.subject_id = q.value(6).toInt();
             list.push_back(t);
         }
     }
@@ -118,14 +124,16 @@ Teacher UserManager::getTeacherById(int id) const {
     Teacher t;
     t.id = -1;
     QSqlQuery q;
-    q.prepare("SELECT id, fullName, phone, email, subject_id FROM teachers WHERE id = ?");
+    q.prepare("SELECT id, fullName, gender, date_of_birth, phone, email, subject_id FROM teachers WHERE id = ?");
     q.addBindValue(id);
     if (q.exec() && q.next()) {
         t.id = q.value(0).toInt();
         t.fullName = q.value(1).toString();
-        t.phone = q.value(2).toString();
-        t.email = q.value(3).toString();
-        t.subject_id = q.value(4).toInt();
+        t.gender = q.value(2).toString();
+        t.dateOfBirth = q.value(3).toString();
+        t.phone = q.value(4).toString();
+        t.email = q.value(5).toString();
+        t.subject_id = q.value(6).toInt();
     }
     return t;
 }

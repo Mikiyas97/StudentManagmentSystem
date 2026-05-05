@@ -10,6 +10,7 @@ struct Mark {
     int subjectId;
     int sectionId;
     int yearId;
+    int semester;
     double score;
 };
 
@@ -25,10 +26,10 @@ class MarkManager {
 public:
     MarkManager();
     
-    bool setMark(int studentId, int subjectId, int sectionId, int yearId, double score);
-    double getStudentAverage(int studentId, int yearId) const;
-    QVector<RankInfo> calculateSectionRanking(int sectionId, int yearId) const;
-    bool isRankingApproved(int sectionId, int yearId) const;
+    bool setMark(int studentId, int subjectId, int sectionId, int yearId, int semester, double score);
+    double getStudentAverage(int studentId, int yearId, int semester) const;
+    QVector<RankInfo> calculateSectionRanking(int sectionId, int yearId, int semester) const;
+    bool isRankingApproved(int sectionId, int yearId, int semester) const;
 };
 
 #endif // MARKMANAGER_H

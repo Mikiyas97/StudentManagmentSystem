@@ -230,12 +230,6 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
     return list;
 }
 
-QVector<Student> StudentManager::getStudentsByCourse(const QString &courseCode) const {
-    // This needs to be refactored to getStudentsBySection or similar
-    QVector<Student> list;
-    return list;
-}
-
 // --------------- Sorting ---------------
 
 void StudentManager::sortBy(SortField field, bool ascending) {

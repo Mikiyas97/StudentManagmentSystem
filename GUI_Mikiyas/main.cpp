@@ -32,8 +32,10 @@ bool setupDatabase() {
     query.exec("ALTER TABLE students ADD COLUMN gender TEXT");
     query.exec("ALTER TABLE students ADD COLUMN date_of_birth TEXT");
                
-    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, phone TEXT, email TEXT, subject_id INTEGER, "
+    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, gender TEXT, date_of_birth TEXT, phone TEXT, email TEXT, subject_id INTEGER, "
                "FOREIGN KEY(subject_id) REFERENCES subjects(id))");
+    query.exec("ALTER TABLE teachers ADD COLUMN gender TEXT");
+    query.exec("ALTER TABLE teachers ADD COLUMN date_of_birth TEXT");
     // Migration: ensure subject_id exists if table was already there
     query.exec("ALTER TABLE teachers ADD COLUMN subject_id INTEGER");
 
@@ -52,18 +54,22 @@ bool setupDatabase() {
     query.exec("CREATE TABLE IF NOT EXISTS homeroom_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, section_id INTEGER, year_id INTEGER, "
                "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
 
-    query.exec("CREATE TABLE IF NOT EXISTS marks (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, score REAL, "
+    query.exec("CREATE TABLE IF NOT EXISTS marks (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, semester INTEGER DEFAULT 1, score REAL, "
                "FOREIGN KEY(student_id) REFERENCES students(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+    query.exec("ALTER TABLE marks ADD COLUMN semester INTEGER DEFAULT 1");
 
-    query.exec("CREATE TABLE IF NOT EXISTS ranking_approvals (section_id INTEGER, year_id INTEGER, is_approved INTEGER DEFAULT 0, "
-               "PRIMARY KEY(section_id, year_id), "
+    query.exec("CREATE TABLE IF NOT EXISTS ranking_approvals (section_id INTEGER, year_id INTEGER, semester INTEGER DEFAULT 1, is_approved INTEGER DEFAULT 0, "
+               "PRIMARY KEY(section_id, year_id, semester), "
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+    query.exec("ALTER TABLE ranking_approvals ADD COLUMN semester INTEGER DEFAULT 1");
 
     // --- Seeding Initial Data ---
     
-    // Seed Academic Year
+    // Seed Academic Year (Ethiopian Calendar standard)
+    query.exec("DELETE FROM academic_years WHERE name LIKE '%/%'"); // Remove old formats like '2015/26'
     query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2018')");
+    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2019')");
     
     // Seed Grade Levels
     QStringList grades = {"9", "10", "11", "12"};

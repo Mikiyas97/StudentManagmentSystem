@@ -80,29 +80,30 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     QVBoxLayout *marksLayout = new QVBoxLayout(marksGroup);
     
     QTableWidget *marksTable = new QTableWidget;
-    marksTable->setColumnCount(3);
-    marksTable->setHorizontalHeaderLabels({"Subject", "Score", "Status"});
+    marksTable->setColumnCount(4);
+    marksTable->setHorizontalHeaderLabels({"Semester", "Subject", "Score", "Status"});
     marksTable->horizontalHeader()->setStretchLastSection(true);
     marksTable->setFixedHeight(200);
     marksTable->setStyleSheet("QTableWidget { background-color: #16213e; border-radius: 4px; gridline-color: #1f4068; }"
                               "QHeaderView::section { background-color: #0f3460; color: white; padding: 4px; }");
     
     QSqlQuery mq;
-    mq.prepare("SELECT sub.name, m.score FROM marks m "
+    mq.prepare("SELECT m.semester, sub.name, m.score FROM marks m "
                "JOIN subjects sub ON m.subject_id = sub.id "
-               "WHERE m.student_id = ? ORDER BY sub.name ASC");
+               "WHERE m.student_id = ? ORDER BY m.semester ASC, sub.name ASC");
     mq.addBindValue(s.id);
     if (mq.exec()) {
         while (mq.next()) {
             int r = marksTable->rowCount();
             marksTable->insertRow(r);
-            marksTable->setItem(r, 0, new QTableWidgetItem(mq.value(0).toString()));
-            double score = mq.value(1).toDouble();
-            marksTable->setItem(r, 1, new QTableWidgetItem(QString::number(score, 'f', 1)));
+            marksTable->setItem(r, 0, new QTableWidgetItem(QString::number(mq.value(0).toInt())));
+            marksTable->setItem(r, 1, new QTableWidgetItem(mq.value(1).toString()));
+            double score = mq.value(2).toDouble();
+            marksTable->setItem(r, 2, new QTableWidgetItem(QString::number(score, 'f', 1)));
             
             QTableWidgetItem *statusItem = new QTableWidgetItem(score >= 40 ? "Pass" : "Fail");
             statusItem->setForeground(score >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
-            marksTable->setItem(r, 2, statusItem);
+            marksTable->setItem(r, 3, statusItem);
         }
     }
     marksLayout->addWidget(marksTable);

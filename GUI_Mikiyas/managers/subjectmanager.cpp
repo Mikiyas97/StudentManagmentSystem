@@ -43,10 +43,21 @@ QVector<Subject> SubjectManager::getSubjectsByGrade(int gradeId, int streamId) c
 }
 
 bool SubjectManager::deleteSubject(int id) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM subjects WHERE id = ?");
-    query.addBindValue(id);
-    return query.exec();
+    // Cascade: remove related data first
+    QSqlQuery q;
+    q.prepare("DELETE FROM marks WHERE subject_id = ?");
+    q.addBindValue(id); q.exec();
+
+    q.prepare("DELETE FROM teaching_assignments WHERE subject_id = ?");
+    q.addBindValue(id); q.exec();
+
+    // Unlink teachers specialized in this subject
+    q.prepare("UPDATE teachers SET subject_id = NULL WHERE subject_id = ?");
+    q.addBindValue(id); q.exec();
+
+    q.prepare("DELETE FROM subjects WHERE id = ?");
+    q.addBindValue(id);
+    return q.exec();
 }
 
 bool SubjectManager::assignTeacherToSubject(int teacherId, int subjectId, int sectionId, int yearId) {
