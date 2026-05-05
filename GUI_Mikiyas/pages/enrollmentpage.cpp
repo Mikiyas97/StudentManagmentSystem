@@ -24,14 +24,46 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
         QHBoxLayout *filterBar = new QHBoxLayout;
         
         sectionFilter = new QComboBox;
-        QSqlQuery sq("SELECT id, name FROM sections");
-        while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
+        subjectFilter = new QComboBox;
+
+        if (userRole == "teacher") {
+            // Load only assigned sections for this teacher
+            QSqlQuery sq;
+            sq.prepare("SELECT DISTINCT s.id, s.name FROM sections s "
+                       "JOIN teaching_assignments ta ON s.id = ta.section_id "
+                       "WHERE ta.teacher_id = ?");
+            sq.addBindValue(userStudentId);
+            if (sq.exec()) {
+                while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
+            }
+
+            // Dynamically update subjects based on selected section
+            auto updateSubjects = [this](int) {
+                subjectFilter->clear();
+                int secId = sectionFilter->currentData().toInt();
+                QSqlQuery subq;
+                subq.prepare("SELECT DISTINCT sub.id, sub.name FROM subjects sub "
+                             "JOIN teaching_assignments ta ON sub.id = ta.subject_id "
+                             "WHERE ta.teacher_id = ? AND ta.section_id = ?");
+                subq.addBindValue(userStudentId);
+                subq.addBindValue(secId);
+                if (subq.exec()) {
+                    while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
+                }
+            };
+            connect(sectionFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSubjects);
+            updateSubjects(0); // initial load
+        } else {
+            // Admin: Load all sections and subjects
+            QSqlQuery sq("SELECT id, name FROM sections");
+            while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
+
+            QSqlQuery subq("SELECT id, name FROM subjects");
+            while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
+        }
+
         filterBar->addWidget(new QLabel("Section:"));
         filterBar->addWidget(sectionFilter);
-
-        subjectFilter = new QComboBox;
-        QSqlQuery subq("SELECT id, name FROM subjects");
-        while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
         filterBar->addWidget(new QLabel("Subject:"));
         filterBar->addWidget(subjectFilter);
 
@@ -86,12 +118,39 @@ void EnrollmentPage::refreshTable() {
                 table->setItem(r, 0, new QTableWidgetItem(query.value(0).toString()));
                 double score = query.value(1).toDouble();
                 table->setItem(r, 1, new QTableWidgetItem(QString::number(score, 'f', 1)));
-                table->setItem(r, 2, new QTableWidgetItem(score >= 50 ? "Pass" : "Fail"));
+                table->setItem(r, 2, new QTableWidgetItem(score >= 40 ? "Pass" : "Fail"));
                 total += score;
                 count++;
             }
         }
-        averageLabel->setText(count > 0 ? "Cumulative Average: " + QString::number(total/count, 'f', 2) : "No results published.");
+        // --- Rank Calculation Logic ---
+        int sectionId = 0;
+        int yearId = 1; // Default to first year
+        QSqlQuery sq;
+        sq.prepare("SELECT section_id FROM students WHERE id = ?");
+        sq.addBindValue(userStudentId);
+        if (sq.exec() && sq.next()) sectionId = sq.value(0).toInt();
+
+        QSqlQuery yq("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
+        if (yq.next()) yearId = yq.value(0).toInt();
+
+        QString rankStr = "Not Ranked (Pending)";
+        if (manager.isRankingApproved(sectionId, yearId)) {
+            QVector<RankInfo> rankings = manager.calculateSectionRanking(sectionId, yearId);
+            for (const auto &info : rankings) {
+                if (info.studentId == userStudentId) {
+                    rankStr = QString::number(info.rank);
+                    break;
+                }
+            }
+        }
+
+        averageLabel->setText(count > 0 
+            ? QString("Total Sum: %1  |  Average: %2  |  Rank: %3")
+                .arg(QString::number(total, 'f', 1))
+                .arg(QString::number(total/count, 'f', 2))
+                .arg(rankStr)
+            : "No results published.");
     }
 }
 
@@ -126,7 +185,9 @@ void EnrollmentPage::onFilter() {
 void EnrollmentPage::onSaveAll() {
     int sectionId = sectionFilter->currentData().toInt();
     int subjectId = subjectFilter->currentData().toInt();
-    int yearId = 1; 
+    int yearId = 1;
+    QSqlQuery yearQ("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
+    if (yearQ.next()) yearId = yearQ.value(0).toInt();
 
     for (int i = 0; i < table->rowCount(); ++i) {
         int sid = table->item(i, 0)->text().toInt();

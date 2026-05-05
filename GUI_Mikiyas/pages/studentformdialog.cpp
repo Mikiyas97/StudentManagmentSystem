@@ -38,6 +38,15 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
     nameEdit->setPlaceholderText("Full name");
     aLayout->addRow("Full Name:", nameEdit);
 
+    genderCombo = new QComboBox;
+    genderCombo->addItems(QStringList() << "Male" << "Female");
+    if (!s.gender.isEmpty()) genderCombo->setCurrentText(s.gender);
+    aLayout->addRow("Gender:", genderCombo);
+
+    dobEdit = new QLineEdit(s.dateOfBirth);
+    dobEdit->setPlaceholderText("DD/MM/YYYY");
+    aLayout->addRow("Date of Birth:", dobEdit);
+
     gradeCombo = new QComboBox;
     QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
     while (gq.next()) {
@@ -160,6 +169,8 @@ void StudentFormDialog::onSave() {
 
     result.id             = idSpin->value();
     result.fullName        = nameEdit->text().trimmed();
+    result.gender          = genderCombo->currentText();
+    result.dateOfBirth     = dobEdit->text().trimmed();
     result.grade_id        = gradeCombo->currentData().toInt();
     result.section_id      = sectionCombo->currentData().toInt();
     result.stream_id       = streamCombo->isEnabled() ? streamCombo->currentData().toInt() : 0;

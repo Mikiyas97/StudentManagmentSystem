@@ -186,7 +186,7 @@ QVector<int> StudentPage::getCheckedIds() const {
 // ── Refresh Table ──
 
 void StudentPage::refreshTable() {
-    manager = StudentManager(); // reload
+    // manager = StudentManager(); // Removed re-initialization that resets sort state
 
     // Update grade filter combo
     QString prevGrade = classFilterCombo->currentText();

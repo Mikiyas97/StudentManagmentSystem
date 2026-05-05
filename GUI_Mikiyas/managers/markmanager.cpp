@@ -71,3 +71,14 @@ QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId
     }
     return ranking;
 }
+
+bool MarkManager::isRankingApproved(int sectionId, int yearId) const {
+    QSqlQuery query;
+    query.prepare("SELECT is_approved FROM ranking_approvals WHERE section_id = ? AND year_id = ?");
+    query.addBindValue(sectionId);
+    query.addBindValue(yearId);
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt() == 1;
+    }
+    return false;
+}

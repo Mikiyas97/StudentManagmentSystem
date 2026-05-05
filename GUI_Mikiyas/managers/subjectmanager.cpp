@@ -50,6 +50,16 @@ bool SubjectManager::deleteSubject(int id) {
 }
 
 bool SubjectManager::assignTeacherToSubject(int teacherId, int subjectId, int sectionId, int yearId) {
+    // Rule 1: One teacher can only teach one specific subject (their specialization)
+    QSqlQuery checkSpec;
+    checkSpec.prepare("SELECT subject_id FROM teachers WHERE id = ?");
+    checkSpec.addBindValue(teacherId);
+    if (checkSpec.exec() && checkSpec.next()) {
+        int specId = checkSpec.value(0).toInt();
+        if (specId != subjectId) return false; // Rule violation
+    }
+
+    // Rule 3: Only one teacher per subject per section (handled by UNIQUE constraint in DB)
     QSqlQuery query;
     query.prepare("INSERT INTO teaching_assignments (teacher_id, subject_id, section_id, year_id) VALUES (?, ?, ?, ?)");
     query.addBindValue(teacherId);

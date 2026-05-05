@@ -5,6 +5,7 @@
 #include <QTableWidget>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QLabel>
 #include <QPushButton>
 #include "managers/usermanager.h"
 
@@ -13,17 +14,30 @@ class TeacherPage : public QWidget {
 public:
     explicit TeacherPage(QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onAddTeacher();
     void onRowDoubleClicked(int row, int column);
     void onSortChanged(int index);
-    void refreshTable();
+    void updateBulkBar();
+    void onSearch();
+    void onViewTeacher(int id);
+    void onEditTeacher(int id);
+    void onDeleteTeacher(int id);
+    void onBulkDelete();
 
 private:
     QTableWidget *table;
     QLineEdit *searchEdit;
     QComboBox *sortCombo;
+    QComboBox *subjectFilterCombo;
+    QWidget *bulkBar;
+    QLabel *selectionLabel;
     UserManager manager;
+    
+    QVector<int> getCheckedIds() const;
 };
 
 #endif // TEACHERPAGE_H

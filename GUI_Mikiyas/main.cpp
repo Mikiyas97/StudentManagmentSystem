@@ -25,11 +25,17 @@ bool setupDatabase() {
                "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
 
     // 2. People Tables
-    query.exec("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, fullName TEXT, grade_id INTEGER, section_id INTEGER, stream_id INTEGER, "
+    query.exec("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, fullName TEXT, gender TEXT, date_of_birth TEXT, grade_id INTEGER, section_id INTEGER, stream_id INTEGER, "
                "phone TEXT, email TEXT, status TEXT, "
                "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(stream_id) REFERENCES streams(id))");
+    // Migration: ensure new columns exist
+    query.exec("ALTER TABLE students ADD COLUMN gender TEXT");
+    query.exec("ALTER TABLE students ADD COLUMN date_of_birth TEXT");
                
-    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, phone TEXT, email TEXT)");
+    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, phone TEXT, email TEXT, subject_id INTEGER, "
+               "FOREIGN KEY(subject_id) REFERENCES subjects(id))");
+    // Migration: ensure subject_id exists if table was already there
+    query.exec("ALTER TABLE teachers ADD COLUMN subject_id INTEGER");
 
     // 3. User Accounts
     query.exec("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT, role TEXT, relatedId INTEGER)");
@@ -40,7 +46,8 @@ bool setupDatabase() {
 
     query.exec("CREATE TABLE IF NOT EXISTS teaching_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, "
                "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
-               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id), "
+               "UNIQUE(section_id, subject_id, year_id))");
 
     query.exec("CREATE TABLE IF NOT EXISTS homeroom_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, section_id INTEGER, year_id INTEGER, "
                "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
@@ -49,10 +56,14 @@ bool setupDatabase() {
                "FOREIGN KEY(student_id) REFERENCES students(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
 
+    query.exec("CREATE TABLE IF NOT EXISTS ranking_approvals (section_id INTEGER, year_id INTEGER, is_approved INTEGER DEFAULT 0, "
+               "PRIMARY KEY(section_id, year_id), "
+               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
+
     // --- Seeding Initial Data ---
     
     // Seed Academic Year
-    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2025/2026')");
+    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2018')");
     
     // Seed Grade Levels
     QStringList grades = {"9", "10", "11", "12"};

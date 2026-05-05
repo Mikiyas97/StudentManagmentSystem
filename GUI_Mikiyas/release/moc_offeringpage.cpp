@@ -42,14 +42,17 @@ template <> constexpr inline auto OfferingPage::qt_create_metaobjectdata<qt_meta
         "OfferingPage",
         "onAdd",
         "",
+        "onOpenAssignments",
         "refreshTable"
     };
 
     QtMocHelpers::UintData qt_methods {
         // Slot 'onAdd'
         QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'refreshTable'
+        // Slot 'onOpenAssignments'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -74,7 +77,8 @@ void OfferingPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: _t->onAdd(); break;
-        case 1: _t->refreshTable(); break;
+        case 1: _t->onOpenAssignments(); break;
+        case 2: _t->refreshTable(); break;
         default: ;
         }
     }
@@ -100,14 +104,14 @@ int OfferingPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 3;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 3)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 2;
+        _id -= 3;
     }
     return _id;
 }

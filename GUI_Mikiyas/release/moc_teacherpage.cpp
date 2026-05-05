@@ -40,29 +40,54 @@ template <> constexpr inline auto TeacherPage::qt_create_metaobjectdata<qt_meta_
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "TeacherPage",
-        "onAddTeacher",
+        "refreshTable",
         "",
+        "onAddTeacher",
         "onRowDoubleClicked",
         "row",
         "column",
         "onSortChanged",
         "index",
-        "refreshTable"
+        "updateBulkBar",
+        "onSearch",
+        "onViewTeacher",
+        "id",
+        "onEditTeacher",
+        "onDeleteTeacher",
+        "onBulkDelete"
     };
 
     QtMocHelpers::UintData qt_methods {
+        // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
         // Slot 'onAddTeacher'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onRowDoubleClicked'
-        QtMocHelpers::SlotData<void(int, int)>(3, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 4 }, { QMetaType::Int, 5 },
+        QtMocHelpers::SlotData<void(int, int)>(4, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 5 }, { QMetaType::Int, 6 },
         }}),
         // Slot 'onSortChanged'
-        QtMocHelpers::SlotData<void(int)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 7 },
+        QtMocHelpers::SlotData<void(int)>(7, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 8 },
         }}),
-        // Slot 'refreshTable'
-        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'updateBulkBar'
+        QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onSearch'
+        QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onViewTeacher'
+        QtMocHelpers::SlotData<void(int)>(11, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 12 },
+        }}),
+        // Slot 'onEditTeacher'
+        QtMocHelpers::SlotData<void(int)>(13, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 12 },
+        }}),
+        // Slot 'onDeleteTeacher'
+        QtMocHelpers::SlotData<void(int)>(14, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 12 },
+        }}),
+        // Slot 'onBulkDelete'
+        QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -86,10 +111,16 @@ void TeacherPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     auto *_t = static_cast<TeacherPage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onAddTeacher(); break;
-        case 1: _t->onRowDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
-        case 2: _t->onSortChanged((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
-        case 3: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onAddTeacher(); break;
+        case 2: _t->onRowDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
+        case 3: _t->onSortChanged((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 4: _t->updateBulkBar(); break;
+        case 5: _t->onSearch(); break;
+        case 6: _t->onViewTeacher((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 7: _t->onEditTeacher((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 8: _t->onDeleteTeacher((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 9: _t->onBulkDelete(); break;
         default: ;
         }
     }
@@ -114,14 +145,14 @@ int TeacherPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 10;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 10)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 10;
     }
     return _id;
 }

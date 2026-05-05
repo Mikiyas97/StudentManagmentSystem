@@ -15,6 +15,7 @@ public:
 
 private slots:
     void onCalculate();
+    void onApprove();
     void refreshTable();
 
 private:

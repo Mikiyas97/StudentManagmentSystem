@@ -19,6 +19,7 @@ debug/reportpage.o
 debug/teacherpage.o
 debug/teacherformdialog.o
 debug/teacherdetaildialog.o
+debug/assignmentdialog.o
 debug/enrollmentpage.o
 debug/offeringpage.o
 debug/profilepage.o
@@ -33,6 +34,7 @@ debug/moc_reportpage.o
 debug/moc_teacherpage.o
 debug/moc_teacherformdialog.o
 debug/moc_teacherdetaildialog.o
+debug/moc_assignmentdialog.o
 debug/moc_enrollmentpage.o
 debug/moc_offeringpage.o
 debug/moc_profilepage.o

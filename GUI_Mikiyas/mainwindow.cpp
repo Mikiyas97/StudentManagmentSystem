@@ -83,18 +83,6 @@ void MainWindow::setupUI() {
 
     sideLayout->addStretch();
 
-    // --- Sync Button ---
-    QPushButton *refreshBtn = new QPushButton(QString::fromUtf8("  \xF0\x9F\x94\x84  Sync Database"));
-    refreshBtn->setObjectName("syncButton");
-    refreshBtn->setCursor(Qt::PointingHandCursor);
-    refreshBtn->setStyleSheet(
-        "QPushButton { background-color: transparent; border: 1px solid #e94560; "
-        "color: #e94560; margin: 10px 15px; padding: 8px; border-radius: 4px; font-weight: bold; }"
-        "QPushButton:hover { background-color: #e94560; color: white; }"
-    );
-    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::onGlobalRefresh);
-    sideLayout->addWidget(refreshBtn);
-
     // Role info at bottom of sidebar
     roleLabel = new QLabel;
     QString roleText = "  Role: " + userRole;
@@ -145,6 +133,33 @@ void MainWindow::setupUI() {
     mainLayout->addWidget(sidebar);
 
     // --- Content area ---
+    QWidget *contentWrapper = new QWidget;
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWrapper);
+    contentLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->setSpacing(0);
+
+    // Top Header for global actions
+    QWidget *header = new QWidget;
+    header->setFixedHeight(50);
+    header->setStyleSheet("background-color: #1a1a2e; border-bottom: 1px solid #16213e;");
+    QHBoxLayout *headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(20, 0, 20, 0);
+    headerLayout->addStretch();
+
+    QPushButton *refreshBtn = new QPushButton(QString::fromUtf8("\xE2\x9A\xA1 Sync"));
+    refreshBtn->setObjectName("syncButton");
+    refreshBtn->setCursor(Qt::PointingHandCursor);
+    refreshBtn->setToolTip("Synchronize and Refresh Page");
+    refreshBtn->setStyleSheet(
+        "QPushButton { background-color: #e94560; color: white; padding: 6px 15px; "
+        "border-radius: 15px; font-weight: bold; font-size: 13px; border: none; }"
+        "QPushButton:hover { background-color: #ff5e78; }"
+    );
+    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::onGlobalRefresh);
+    headerLayout->addWidget(refreshBtn);
+
+    contentLayout->addWidget(header);
+
     stack = new QStackedWidget;
     stack->setObjectName("contentArea");
 
@@ -166,7 +181,8 @@ void MainWindow::setupUI() {
         stack->addWidget(new EnrollmentPage("student", userStudentId)); // 1 (View Marks)
     }
 
-    mainLayout->addWidget(stack, 1);
+    contentLayout->addWidget(stack);
+    mainLayout->addWidget(contentWrapper, 1);
 
     // Select first page
     switchPage(0);

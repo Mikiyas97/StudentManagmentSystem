@@ -7,6 +7,8 @@
 struct Student {
     int id;
     QString fullName;
+    QString gender;
+    QString dateOfBirth;
     int grade_id;
     QString gradeName;
     int section_id;

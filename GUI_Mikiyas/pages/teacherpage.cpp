@@ -7,57 +7,109 @@
 #include <QLabel>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QGroupBox>
+#include <QSqlQuery>
+#include <QSqlError>
 #include "../managers/subjectmanager.h"
+
+#include <QCheckBox>
 
 TeacherPage::TeacherPage(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(15);
-    layout->setContentsMargins(25, 20, 25, 20);
+    layout->setContentsMargins(35, 30, 35, 30);
 
-    // --- Header ---
-    QHBoxLayout *headerLayout = new QHBoxLayout;
-    // --- Toolbar ---
-    QHBoxLayout *toolbar = new QHBoxLayout;
-    
-    searchEdit = new QLineEdit;
-    searchEdit->setPlaceholderText("Search by Name, Phone, or Email...");
-    searchEdit->setFixedWidth(300);
-    searchEdit->setStyleSheet("padding: 8px; border-radius: 4px; background: #16213e; color: white; border: 1px solid #1f4068;");
-    connect(searchEdit, &QLineEdit::textChanged, this, &TeacherPage::refreshTable);
-    
-    toolbar->addWidget(new QLabel("🔍"));
-    toolbar->addWidget(searchEdit);
-    toolbar->addSpacing(20);
-    
-    toolbar->addWidget(new QLabel("Sort By:"));
+    // ── Page Title ──
+    QLabel *title = new QLabel("Teachers Management");
+    title->setObjectName("pageTitle");
+    QLabel *subtitle = new QLabel("Manage teaching staff — add, search, and assign specializations");
+    subtitle->setObjectName("subtitle");
+    layout->addWidget(title);
+    layout->addWidget(subtitle);
+
+    // ── Top Action Bar ──
+    QHBoxLayout *topBar = new QHBoxLayout;
+    topBar->setSpacing(10);
+
+    QPushButton *addBtn = new QPushButton("+ Register New Teacher");
+    addBtn->setCursor(Qt::PointingHandCursor);
+    connect(addBtn, &QPushButton::clicked, this, &TeacherPage::onAddTeacher);
+    topBar->addWidget(addBtn);
+    topBar->addStretch();
+
+    // Sort combo
+    QLabel *sortLabel = new QLabel("Sort:");
+    sortLabel->setStyleSheet("background:transparent;");
     sortCombo = new QComboBox;
     sortCombo->addItem("ID Asc", "id ASC");
     sortCombo->addItem("ID Desc", "id DESC");
     sortCombo->addItem("Name A-Z", "fullName ASC");
     sortCombo->addItem("Name Z-A", "fullName DESC");
-    sortCombo->setStyleSheet("padding: 5px; border-radius: 4px; background: #16213e; color: white;");
+    sortCombo->setFixedWidth(140);
     connect(sortCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TeacherPage::onSortChanged);
-    toolbar->addWidget(sortCombo);
-    
-    toolbar->addStretch();
-    
-    QPushButton *addBtn = new QPushButton("Register New Teacher");
-    addBtn->setStyleSheet("background-color: #e94560; color: white; padding: 8px 15px; font-weight: bold; border-radius: 4px;");
-    addBtn->setCursor(Qt::PointingHandCursor);
-    connect(addBtn, &QPushButton::clicked, this, &TeacherPage::onAddTeacher);
-    toolbar->addWidget(addBtn);
-    
-    layout->addLayout(toolbar);
+    topBar->addWidget(sortLabel);
+    topBar->addWidget(sortCombo);
+    layout->addLayout(topBar);
 
-    // --- Table ---
+    // ── Search & Filter Bar ──
+    QGroupBox *searchGroup = new QGroupBox("Search & Filter");
+    QHBoxLayout *searchLayout = new QHBoxLayout(searchGroup);
+    searchLayout->setSpacing(10);
+
+    searchEdit = new QLineEdit;
+    searchEdit->setPlaceholderText("Search by name, phone or email...");
+    searchEdit->setClearButtonEnabled(true);
+    searchLayout->addWidget(searchEdit, 1);
+
+    searchLayout->addWidget(new QLabel("Subject:"));
+    subjectFilterCombo = new QComboBox;
+    subjectFilterCombo->addItem("All");
+    subjectFilterCombo->setFixedWidth(150);
+    searchLayout->addWidget(subjectFilterCombo);
+
+    QPushButton *searchBtn = new QPushButton("Search");
+    searchBtn->setObjectName("secondaryButton");
+    searchBtn->setCursor(Qt::PointingHandCursor);
+    connect(searchBtn, &QPushButton::clicked, this, &TeacherPage::onSearch);
+    searchLayout->addWidget(searchBtn);
+
+    layout->addWidget(searchGroup);
+
+    // ── Bulk Actions Bar ──
+    bulkBar = new QWidget;
+    bulkBar->setObjectName("bulkBar");
+    bulkBar->setStyleSheet("#bulkBar { background-color: #1f4068; border-radius: 6px; padding: 6px 12px; }");
+    QHBoxLayout *bulkLayout = new QHBoxLayout(bulkBar);
+    bulkLayout->setContentsMargins(10, 4, 10, 4);
+    bulkLayout->setSpacing(10);
+
+    selectionLabel = new QLabel("0 selected");
+    selectionLabel->setStyleSheet("color: #eaeaea; font-weight: bold; background: transparent;");
+    bulkLayout->addWidget(selectionLabel);
+
+    QPushButton *bulkDeleteBtn = new QPushButton("Bulk Delete");
+    bulkDeleteBtn->setStyleSheet("QPushButton { background-color: #c0392b; padding: 6px 14px; } QPushButton:hover { background-color: #a93226; }");
+    bulkDeleteBtn->setCursor(Qt::PointingHandCursor);
+    connect(bulkDeleteBtn, &QPushButton::clicked, this, &TeacherPage::onBulkDelete);
+    bulkLayout->addWidget(bulkDeleteBtn);
+    bulkLayout->addStretch();
+
+    bulkBar->setVisible(false);
+    layout->addWidget(bulkBar);
+
+    // ── Table ──
     table = new QTableWidget;
-    table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"ID", "Full Name", "Phone", "Email"});
+    table->setColumnCount(6);
+    table->setHorizontalHeaderLabels({"", "ID", "Full Name", "Phone", "Email", "Actions"});
     table->horizontalHeader()->setStretchLastSection(true);
-    table->setAlternatingRowColors(true);
-    table->verticalHeader()->setVisible(false);
+    table->setColumnWidth(0, 35);
+    table->setColumnWidth(1, 70);
+    table->setColumnWidth(2, 200);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->setAlternatingRowColors(true);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->verticalHeader()->setVisible(false);
     
     connect(table, &QTableWidget::cellDoubleClicked, this, &TeacherPage::onRowDoubleClicked);
     
@@ -74,10 +126,6 @@ void TeacherPage::onAddTeacher() {
         QString pass = "pass" + QString::number(t.id);
 
         if (manager.addTeacher(t, pass)) {
-            // Handle Assignment
-            SubjectManager sm;
-            sm.assignTeacherToSubject(t.id, dialog.getSubjectId(), dialog.getSectionId(), 1);
-
             QMessageBox::information(this, "Success", "Teacher Registered!\nID: " + QString::number(t.id) + "\nPassword: " + pass);
             refreshTable();
         } else {
@@ -86,8 +134,20 @@ void TeacherPage::onAddTeacher() {
     }
 }
 
-void TeacherPage::onRowDoubleClicked(int row, int column) {
-    int id = table->item(row, 0)->text().toInt();
+void TeacherPage::onRowDoubleClicked(int row, int /*column*/) {
+    if (row < 0 || !table->item(row, 1)) return;
+    onViewTeacher(table->item(row, 1)->text().toInt());
+}
+
+void TeacherPage::onSortChanged(int /*index*/) {
+    refreshTable();
+}
+
+void TeacherPage::onSearch() {
+    refreshTable();
+}
+
+void TeacherPage::onViewTeacher(int id) {
     Teacher t = manager.getTeacherById(id);
     if (t.id != -1) {
         TeacherDetailDialog dialog(t, this);
@@ -95,18 +155,104 @@ void TeacherPage::onRowDoubleClicked(int row, int column) {
     }
 }
 
-void TeacherPage::onSortChanged(int /*index*/) {
-    refreshTable();
+void TeacherPage::onEditTeacher(int /*id*/) {
+    QMessageBox::information(this, "Info", "Edit functionality will be implemented soon.");
+}
+
+void TeacherPage::onDeleteTeacher(int id) {
+    if (QMessageBox::question(this, "Confirm", "Delete teacher ID " + QString::number(id) + "?") == QMessageBox::Yes) {
+        if (manager.deleteTeacher(id)) {
+            refreshTable();
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to delete teacher.");
+        }
+    }
+}
+
+void TeacherPage::onBulkDelete() {
+    QVector<int> ids = getCheckedIds();
+    if (ids.isEmpty()) return;
+    if (QMessageBox::question(this, "Bulk Delete", "Delete " + QString::number(ids.size()) + " teacher(s)?") == QMessageBox::Yes) {
+        for (int id : ids) manager.deleteTeacher(id);
+        refreshTable();
+    }
+}
+
+void TeacherPage::updateBulkBar() {
+    int count = getCheckedIds().size();
+    bulkBar->setVisible(count > 0);
+    selectionLabel->setText(QString::number(count) + " selected");
+}
+
+QVector<int> TeacherPage::getCheckedIds() const {
+    QVector<int> ids;
+    for (int i = 0; i < table->rowCount(); ++i) {
+        QWidget *w = table->cellWidget(i, 0);
+        if (w) {
+            QCheckBox *cb = w->findChild<QCheckBox*>();
+            if (cb && cb->isChecked()) {
+                ids.push_back(table->item(i, 1)->text().toInt());
+            }
+        }
+    }
+    return ids;
 }
 
 void TeacherPage::refreshTable() {
+    // Update subject filter combo
+    QString prevSub = subjectFilterCombo->currentText();
+    subjectFilterCombo->blockSignals(true);
+    subjectFilterCombo->clear();
+    subjectFilterCombo->addItem("All");
+    QSqlQuery qsub("SELECT name FROM subjects ORDER BY name ASC");
+    while (qsub.next()) subjectFilterCombo->addItem(qsub.value(0).toString());
+    int idx = subjectFilterCombo->findText(prevSub);
+    if (idx >= 0) subjectFilterCombo->setCurrentIndex(idx);
+    subjectFilterCombo->blockSignals(false);
+
     QString sortBy = sortCombo ? sortCombo->currentData().toString() : "";
     QVector<Teacher> teachers = manager.filterTeachers(searchEdit->text().trimmed(), sortBy);
+    
     table->setRowCount(teachers.size());
     for (int i = 0; i < teachers.size(); ++i) {
-        table->setItem(i, 0, new QTableWidgetItem(QString::number(teachers[i].id)));
-        table->setItem(i, 1, new QTableWidgetItem(teachers[i].fullName));
-        table->setItem(i, 2, new QTableWidgetItem(teachers[i].phone));
-        table->setItem(i, 3, new QTableWidgetItem(teachers[i].email));
+        const Teacher &t = teachers[i];
+
+        // Checkbox
+        QWidget *cbContainer = new QWidget;
+        QHBoxLayout *cbLayout = new QHBoxLayout(cbContainer);
+        cbLayout->setContentsMargins(0, 0, 0, 0);
+        cbLayout->setAlignment(Qt::AlignCenter);
+        QCheckBox *cb = new QCheckBox;
+        connect(cb, &QCheckBox::stateChanged, this, &TeacherPage::updateBulkBar);
+        cbLayout->addWidget(cb);
+        table->setCellWidget(i, 0, cbContainer);
+
+        table->setItem(i, 1, new QTableWidgetItem(QString::number(t.id)));
+        table->setItem(i, 2, new QTableWidgetItem(t.fullName));
+        table->setItem(i, 3, new QTableWidgetItem(t.phone));
+        table->setItem(i, 4, new QTableWidgetItem(t.email));
+
+        // Action buttons
+        QWidget *actWidget = new QWidget;
+        QHBoxLayout *actLayout = new QHBoxLayout(actWidget);
+        actLayout->setContentsMargins(2, 2, 2, 2);
+        actLayout->setSpacing(4);
+
+        QPushButton *viewBtn = new QPushButton("View");
+        viewBtn->setFixedSize(50, 26);
+        viewBtn->setCursor(Qt::PointingHandCursor);
+        viewBtn->setStyleSheet("QPushButton { background: #0f3460; font-size: 11px; border-radius: 4px; } QPushButton:hover { background: #1a5276; }");
+        connect(viewBtn, &QPushButton::clicked, this, [this, t]() { onViewTeacher(t.id); });
+
+        QPushButton *delBtn = new QPushButton("Del");
+        delBtn->setFixedSize(45, 26);
+        delBtn->setCursor(Qt::PointingHandCursor);
+        delBtn->setStyleSheet("QPushButton { background: #3c1414; font-size: 11px; border-radius: 4px; } QPushButton:hover { background: #5c1e1e; }");
+        connect(delBtn, &QPushButton::clicked, this, [this, t]() { onDeleteTeacher(t.id); });
+
+        actLayout->addWidget(viewBtn);
+        actLayout->addWidget(delBtn);
+        table->setCellWidget(i, 5, actWidget);
     }
+    updateBulkBar();
 }

@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QHeaderView>
 #include <QSqlQuery>
+#include <QMessageBox>
 
 GradePage::GradePage(const QString &role, int id, QWidget *parent)
     : QWidget(parent), userRole(role), userId(id)
@@ -33,8 +34,14 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     controls->addWidget(yearCombo);
 
     QPushButton *calcBtn = new QPushButton("Generate Ranking");
+    calcBtn->setStyleSheet("background-color: #3498db; color: white;");
     connect(calcBtn, &QPushButton::clicked, this, &GradePage::onCalculate);
     controls->addWidget(calcBtn);
+
+    QPushButton *approveBtn = new QPushButton("Approve Results");
+    approveBtn->setStyleSheet("background-color: #2ecc71; color: white; font-weight: bold;");
+    connect(approveBtn, &QPushButton::clicked, this, &GradePage::onApprove);
+    controls->addWidget(approveBtn);
     
     controls->addStretch();
     layout->addLayout(controls);
@@ -74,5 +81,21 @@ void GradePage::onCalculate() {
         table->setItem(r, 2, new QTableWidgetItem(info.studentName));
         table->setItem(r, 3, new QTableWidgetItem(QString::number(info.totalScore, 'f', 1)));
         table->setItem(r, 4, new QTableWidgetItem(QString::number(info.average, 'f', 2)));
+    }
+}
+
+void GradePage::onApprove() {
+    int sectionId = sectionCombo->currentData().toInt();
+    int yearId = yearCombo->currentData().toInt();
+
+    QSqlQuery q;
+    q.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, is_approved) VALUES (?, ?, 1)");
+    q.addBindValue(sectionId);
+    q.addBindValue(yearId);
+    
+    if (q.exec()) {
+        QMessageBox::information(this, "Success", "Ranking has been approved and is now visible to students.");
+    } else {
+        QMessageBox::warning(this, "Error", "Failed to approve ranking.");
     }
 }

@@ -1,4 +1,5 @@
 #include "offeringpage.h"
+#include "assignmentdialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -46,6 +47,11 @@ OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     connect(addBtn, &QPushButton::clicked, this, &OfferingPage::onAdd);
     inputLayout->addWidget(addBtn);
 
+    QPushButton *assignBtn = new QPushButton("Teacher Assignments");
+    assignBtn->setStyleSheet("background-color: #3498db; color: white; margin-left: 10px;");
+    connect(assignBtn, &QPushButton::clicked, this, &OfferingPage::onOpenAssignments);
+    inputLayout->addWidget(assignBtn);
+
     layout->addWidget(inputArea);
 
     // --- Table ---
@@ -82,4 +88,9 @@ void OfferingPage::onAdd() {
     } else {
         QMessageBox::warning(this, "Error", "Failed to create section.");
     }
+}
+
+void OfferingPage::onOpenAssignments() {
+    AssignmentDialog dlg(this);
+    dlg.exec();
 }

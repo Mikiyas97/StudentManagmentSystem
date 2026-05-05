@@ -9,6 +9,7 @@ struct Teacher {
     QString fullName;
     QString phone;
     QString email;
+    int subject_id; // Added specialization
 };
 
 struct User {
@@ -33,6 +34,7 @@ public:
     QVector<Teacher> getTeachers() const;
     QVector<Teacher> filterTeachers(const QString &searchText, const QString &sortBy = "") const;
     Teacher getTeacherById(int id) const;
+    bool deleteTeacher(int id);
 };
 
 #endif // USERMANAGER_H

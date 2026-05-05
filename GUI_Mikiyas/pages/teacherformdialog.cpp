@@ -20,16 +20,11 @@ TeacherFormDialog::TeacherFormDialog(QWidget *parent) : QDialog(parent) {
     subjectCombo = new QComboBox;
     QSqlQuery sq("SELECT id, name FROM subjects");
     while (sq.next()) subjectCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
-    
-    sectionCombo = new QComboBox;
-    QSqlQuery secq("SELECT id, name FROM sections");
-    while (secq.next()) sectionCombo->addItem(secq.value("name").toString(), secq.value("id").toInt());
 
     form->addRow("Full Name:", nameEdit);
     form->addRow("Phone:", phoneEdit);
     form->addRow("Email:", emailEdit);
-    form->addRow("Assign Subject:", subjectCombo);
-    form->addRow("Assign Section:", sectionCombo);
+    form->addRow("Subject Specialization:", subjectCombo);
 
     layout->addLayout(form);
 
@@ -48,12 +43,9 @@ void TeacherFormDialog::onSave() {
     resultTeacher.fullName = nameEdit->text().trimmed();
     resultTeacher.phone = phoneEdit->text().trimmed();
     resultTeacher.email = emailEdit->text().trimmed();
-    resultSubjectId = subjectCombo->currentData().toInt();
-    resultSectionId = sectionCombo->currentData().toInt();
+    resultTeacher.subject_id = subjectCombo->currentData().toInt();
 
     accept();
 }
 
 Teacher TeacherFormDialog::getTeacher() const { return resultTeacher; }
-int TeacherFormDialog::getSubjectId() const { return resultSubjectId; }
-int TeacherFormDialog::getSectionId() const { return resultSectionId; }

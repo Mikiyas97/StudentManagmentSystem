@@ -40,8 +40,9 @@ template <> constexpr inline auto StudentPage::qt_create_metaobjectdata<qt_meta_
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "StudentPage",
-        "onAddStudent",
+        "refreshTable",
         "",
+        "onAddStudent",
         "onEditStudent",
         "onViewStudent",
         "onDeleteStudent",
@@ -53,35 +54,34 @@ template <> constexpr inline auto StudentPage::qt_create_metaobjectdata<qt_meta_
         "onRowDoubleClicked",
         "row",
         "column",
-        "refreshTable",
         "updateBulkBar"
     };
 
     QtMocHelpers::UintData qt_methods {
+        // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
         // Slot 'onAddStudent'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onEditStudent'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onViewStudent'
+        // Slot 'onEditStudent'
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onDeleteStudent'
+        // Slot 'onViewStudent'
         QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onBulkDelete'
+        // Slot 'onDeleteStudent'
         QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onBulkAssignClass'
+        // Slot 'onBulkDelete'
         QtMocHelpers::SlotData<void()>(7, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onSearch'
+        // Slot 'onBulkAssignClass'
         QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onSearch'
+        QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onSortChanged'
-        QtMocHelpers::SlotData<void(int)>(9, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 10 },
+        QtMocHelpers::SlotData<void(int)>(10, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 11 },
         }}),
         // Slot 'onRowDoubleClicked'
-        QtMocHelpers::SlotData<void(int, int)>(11, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 12 }, { QMetaType::Int, 13 },
+        QtMocHelpers::SlotData<void(int, int)>(12, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 13 }, { QMetaType::Int, 14 },
         }}),
-        // Slot 'refreshTable'
-        QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'updateBulkBar'
         QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
     };
@@ -107,16 +107,16 @@ void StudentPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
     auto *_t = static_cast<StudentPage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onAddStudent(); break;
-        case 1: _t->onEditStudent(); break;
-        case 2: _t->onViewStudent(); break;
-        case 3: _t->onDeleteStudent(); break;
-        case 4: _t->onBulkDelete(); break;
-        case 5: _t->onBulkAssignClass(); break;
-        case 6: _t->onSearch(); break;
-        case 7: _t->onSortChanged((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
-        case 8: _t->onRowDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
-        case 9: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onAddStudent(); break;
+        case 2: _t->onEditStudent(); break;
+        case 3: _t->onViewStudent(); break;
+        case 4: _t->onDeleteStudent(); break;
+        case 5: _t->onBulkDelete(); break;
+        case 6: _t->onBulkAssignClass(); break;
+        case 7: _t->onSearch(); break;
+        case 8: _t->onSortChanged((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 9: _t->onRowDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
         case 10: _t->updateBulkBar(); break;
         default: ;
         }

@@ -7,6 +7,10 @@
 #include <QFormLayout>
 #include <QFrame>
 
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QSqlQuery>
+
 static QLabel* makeValue(const QString &text) {
     QLabel *lbl = new QLabel(text.isEmpty() ? "—" : text);
     lbl->setStyleSheet("color: #eaeaea; font-size: 14px; background: transparent;");
@@ -24,7 +28,7 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     : QDialog(parent), student(s)
 {
     setWindowTitle("Student Details — " + s.fullName);
-    setFixedSize(500, 500);
+    setFixedSize(500, 750);
 
     QVBoxLayout *main = new QVBoxLayout(this);
     main->setSpacing(12);
@@ -54,6 +58,15 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     line->setFixedHeight(1);
     main->addWidget(line);
 
+    // --- Personal Info ---
+    QGroupBox *personalGroup = new QGroupBox("Personal Information");
+    QFormLayout *pf = new QFormLayout(personalGroup);
+    pf->addRow(makeFieldLabel("Gender:"),        makeValue(s.gender.isEmpty() ? "Not Set" : s.gender));
+    pf->addRow(makeFieldLabel("Date of Birth:"), makeValue(s.dateOfBirth.isEmpty() ? "Not Set" : s.dateOfBirth));
+    pf->addRow(makeFieldLabel("Phone:"),         makeValue(s.phone));
+    pf->addRow(makeFieldLabel("Email:"),         makeValue(s.email));
+    main->addWidget(personalGroup);
+
     // --- Academic Info ---
     QGroupBox *academicGroup = new QGroupBox("Academic Placement");
     QFormLayout *af = new QFormLayout(academicGroup);
@@ -62,12 +75,38 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     af->addRow(makeFieldLabel("Stream:"),   makeValue(s.streamName.isEmpty() ? "General" : s.streamName));
     main->addWidget(academicGroup);
 
-    // --- Contact Info ---
-    QGroupBox *contactGroup = new QGroupBox("Contact Information");
-    QFormLayout *cf = new QFormLayout(contactGroup);
-    cf->addRow(makeFieldLabel("Phone:"),   makeValue(s.phone));
-    cf->addRow(makeFieldLabel("Email:"),   makeValue(s.email));
-    main->addWidget(contactGroup);
+    // --- Performance Summary ---
+    QGroupBox *marksGroup = new QGroupBox("Academic Performance (2018)");
+    QVBoxLayout *marksLayout = new QVBoxLayout(marksGroup);
+    
+    QTableWidget *marksTable = new QTableWidget;
+    marksTable->setColumnCount(3);
+    marksTable->setHorizontalHeaderLabels({"Subject", "Score", "Status"});
+    marksTable->horizontalHeader()->setStretchLastSection(true);
+    marksTable->setFixedHeight(200);
+    marksTable->setStyleSheet("QTableWidget { background-color: #16213e; border-radius: 4px; gridline-color: #1f4068; }"
+                              "QHeaderView::section { background-color: #0f3460; color: white; padding: 4px; }");
+    
+    QSqlQuery mq;
+    mq.prepare("SELECT sub.name, m.score FROM marks m "
+               "JOIN subjects sub ON m.subject_id = sub.id "
+               "WHERE m.student_id = ? ORDER BY sub.name ASC");
+    mq.addBindValue(s.id);
+    if (mq.exec()) {
+        while (mq.next()) {
+            int r = marksTable->rowCount();
+            marksTable->insertRow(r);
+            marksTable->setItem(r, 0, new QTableWidgetItem(mq.value(0).toString()));
+            double score = mq.value(1).toDouble();
+            marksTable->setItem(r, 1, new QTableWidgetItem(QString::number(score, 'f', 1)));
+            
+            QTableWidgetItem *statusItem = new QTableWidgetItem(score >= 40 ? "Pass" : "Fail");
+            statusItem->setForeground(score >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
+            marksTable->setItem(r, 2, statusItem);
+        }
+    }
+    marksLayout->addWidget(marksTable);
+    main->addWidget(marksGroup);
 
     // --- Buttons ---
     QHBoxLayout *btnRow = new QHBoxLayout;

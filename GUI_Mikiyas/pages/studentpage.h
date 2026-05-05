@@ -13,6 +13,9 @@ class StudentPage : public QWidget {
 public:
     explicit StudentPage(const QString &role = "admin", int id = -1, QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onAddStudent();
     void onEditStudent();
@@ -23,7 +26,6 @@ private slots:
     void onSearch();
     void onSortChanged(int index);
     void onRowDoubleClicked(int row, int column);
-    void refreshTable();
     void updateBulkBar();
 
 private:

@@ -25,10 +25,12 @@ int StudentManager::generateNextId() const {
 
 bool StudentManager::addStudent(const Student &s) {
     QSqlQuery query;
-    query.prepare("INSERT INTO students (id, fullName, grade_id, section_id, stream_id, phone, email, status) "
-                  "VALUES (:id, :name, :grade, :section, :stream, :phone, :email, :status)");
+    query.prepare("INSERT INTO students (id, fullName, gender, date_of_birth, grade_id, section_id, stream_id, phone, email, status) "
+                  "VALUES (:id, :name, :gender, :dob, :grade, :section, :stream, :phone, :email, :status)");
     query.bindValue(":id", s.id);
     query.bindValue(":name", s.fullName);
+    query.bindValue(":gender", s.gender);
+    query.bindValue(":dob", s.dateOfBirth);
     query.bindValue(":grade", s.grade_id);
     query.bindValue(":section", s.section_id);
     query.bindValue(":stream", s.stream_id > 0 ? QVariant(s.stream_id) : QVariant(QVariant::Int));
@@ -43,6 +45,35 @@ bool StudentManager::addStudent(const Student &s) {
         u.role = "student";
         u.relatedId = s.id;
         um.addUser(u);
+
+        // --- Automatic Subject Assignment ---
+        // 1. Get current year ID
+        int yearId = 1;
+        QSqlQuery yq("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
+        if (yq.next()) yearId = yq.value(0).toInt();
+
+        // 2. Get subjects for this grade and stream
+        QSqlQuery sq;
+        QString sSql = "SELECT id FROM subjects WHERE grade_id = ? AND (stream_id IS NULL OR stream_id = 0";
+        if (s.stream_id > 0) sSql += " OR stream_id = ?)";
+        else sSql += ")";
+        
+        sq.prepare(sSql);
+        sq.addBindValue(s.grade_id);
+        if (s.stream_id > 0) sq.addBindValue(s.stream_id);
+
+        if (sq.exec()) {
+            QSqlQuery mq;
+            mq.prepare("INSERT INTO marks (student_id, subject_id, section_id, year_id, score) VALUES (?, ?, ?, ?, 0)");
+            while (sq.next()) {
+                mq.addBindValue(s.id);
+                mq.addBindValue(sq.value(0).toInt());
+                mq.addBindValue(s.section_id);
+                mq.addBindValue(yearId);
+                mq.exec();
+            }
+        }
+
         return true;
     }
     return false;
@@ -50,10 +81,12 @@ bool StudentManager::addStudent(const Student &s) {
 
 bool StudentManager::updateStudent(const Student &s) {
     QSqlQuery query;
-    query.prepare("UPDATE students SET fullName=:name, grade_id=:grade, section_id=:section, stream_id=:stream, phone=:phone, "
+    query.prepare("UPDATE students SET fullName=:name, gender=:gender, date_of_birth=:dob, grade_id=:grade, section_id=:section, stream_id=:stream, phone=:phone, "
                   "email=:email, status=:status WHERE id=:id");
     query.bindValue(":id", s.id);
     query.bindValue(":name", s.fullName);
+    query.bindValue(":gender", s.gender);
+    query.bindValue(":dob", s.dateOfBirth);
     query.bindValue(":grade", s.grade_id);
     query.bindValue(":section", s.section_id);
     query.bindValue(":stream", s.stream_id > 0 ? QVariant(s.stream_id) : QVariant(QVariant::Int));
@@ -112,6 +145,8 @@ static Student parseStudent(QSqlQuery &q) {
     Student s;
     s.id = q.value("id").toInt();
     s.fullName = q.value("fullName").toString();
+    s.gender = q.value("gender").toString();
+    s.dateOfBirth = q.value("date_of_birth").toString();
     s.grade_id = q.value("grade_id").toInt();
     s.gradeName = q.value("grade_name").toString();
     s.section_id = q.value("section_id").toInt();
@@ -160,14 +195,20 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
                   "LEFT JOIN streams st ON s.stream_id = st.id "
                   "WHERE 1=1";
     
+    QStringList conditions;
+    QVariantList params;
+
     if (!nameOrId.isEmpty()) {
-        sql += " AND (s.id LIKE '%" + nameOrId + "%' OR s.fullName LIKE '%" + nameOrId + "%')";
+        sql += " AND (s.id LIKE ? OR s.fullName LIKE ?)";
+        params << "%" + nameOrId + "%" << "%" + nameOrId + "%";
     }
     if (!gradeFilter.isEmpty() && gradeFilter != "All") {
-        sql += " AND g.name = '" + gradeFilter + "'";
+        sql += " AND g.name = ?";
+        params << gradeFilter;
     }
     if (!statusFilter.isEmpty() && statusFilter != "All") {
-        sql += " AND s.status = '" + statusFilter + "'";
+        sql += " AND s.status = ?";
+        params << statusFilter;
     }
     
     if (currentSortField == ByName) {
@@ -179,8 +220,13 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
     }
 
     QVector<Student> list;
-    QSqlQuery query(sql);
-    while (query.next()) list.push_back(parseStudent(query));
+    QSqlQuery query;
+    query.prepare(sql);
+    for (const QVariant &p : params) query.addBindValue(p);
+    
+    if (query.exec()) {
+        while (query.next()) list.push_back(parseStudent(query));
+    }
     return list;
 }
 

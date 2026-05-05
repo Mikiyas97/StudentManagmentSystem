@@ -23,6 +23,8 @@ private:
     bool editing;
     QSpinBox    *idSpin;
     QLineEdit   *nameEdit;
+    QComboBox   *genderCombo;
+    QLineEdit   *dobEdit;
     QComboBox   *gradeCombo;
     QComboBox   *sectionCombo;
     QComboBox   *streamCombo;

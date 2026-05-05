@@ -15,9 +15,9 @@ int ReportManager::countStudents() {
 }
 
 int ReportManager::countGrades() {
-    return countTableRows("grades");
+    return countTableRows("grade_levels");
 }
 
 int ReportManager::countCourses() {
-    return countTableRows("courses");
+    return countTableRows("subjects");
 }

@@ -12,8 +12,6 @@ public:
     explicit TeacherFormDialog(QWidget *parent = nullptr);
 
     Teacher getTeacher() const;
-    int getSubjectId() const;
-    int getSectionId() const;
 
 private slots:
     void onSave();
@@ -23,11 +21,8 @@ private:
     QLineEdit *phoneEdit;
     QLineEdit *emailEdit;
     QComboBox *subjectCombo;
-    QComboBox *sectionCombo;
     
     Teacher resultTeacher;
-    int resultSubjectId;
-    int resultSectionId;
 };
 
 #endif // TEACHERFORMDIALOG_H
