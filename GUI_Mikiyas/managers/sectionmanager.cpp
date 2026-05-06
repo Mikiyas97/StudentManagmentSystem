@@ -5,6 +5,33 @@
 
 SectionManager::SectionManager() {}
 
+QVector<GradeLevel> SectionManager::getAllGrades() {
+    QVector<GradeLevel> list;
+    QSqlQuery query("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
+    while (query.next()) {
+        list.push_back({query.value("id").toInt(), query.value("name").toString()});
+    }
+    return list;
+}
+
+QVector<AcademicYear> SectionManager::getAllYears() {
+    QVector<AcademicYear> list;
+    QSqlQuery query("SELECT id, name FROM academic_years ORDER BY name DESC");
+    while (query.next()) {
+        list.push_back({query.value("id").toInt(), query.value("name").toString()});
+    }
+    return list;
+}
+
+QVector<Stream> SectionManager::getAllStreams() {
+    QVector<Stream> list;
+    QSqlQuery query("SELECT id, name FROM streams");
+    while (query.next()) {
+        list.push_back({query.value("id").toInt(), query.value("name").toString()});
+    }
+    return list;
+}
+
 bool SectionManager::addSection(int gradeId, const QString &name, int yearId) {
     QSqlQuery query;
     query.prepare("INSERT INTO sections (grade_id, name, year_id) VALUES (?, ?, ?)");

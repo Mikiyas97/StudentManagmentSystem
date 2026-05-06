@@ -4,6 +4,11 @@
 #include <QString>
 #include <QVector>
 
+// --- Shared lookup structs (used by dropdowns across many pages) ---
+struct GradeLevel { int id; QString name; };
+struct AcademicYear { int id; QString name; };
+struct Stream { int id; QString name; };
+
 struct Section {
     int id;
     int grade_id;
@@ -17,6 +22,12 @@ class SectionManager {
 public:
     SectionManager();
     
+    // Lookup helpers (shared across many pages for combo boxes)
+    static QVector<GradeLevel> getAllGrades();
+    static QVector<AcademicYear> getAllYears();
+    static QVector<Stream> getAllStreams();
+    
+    // Section CRUD
     bool addSection(int gradeId, const QString &name, int yearId);
     QVector<Section> getSectionsByGrade(int gradeId) const;
     QVector<Section> getAllSections() const;

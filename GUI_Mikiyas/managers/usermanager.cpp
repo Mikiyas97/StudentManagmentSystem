@@ -158,3 +158,73 @@ bool UserManager::deleteTeacher(int id) {
     }
     return false;
 }
+
+QVector<GradeLevel> UserManager::getTeacherGrades(int teacherId) const {
+    QVector<GradeLevel> list;
+    QSqlQuery q;
+    q.prepare("SELECT DISTINCT g.id, g.name FROM grade_levels g "
+              "JOIN sections s ON g.id = s.grade_id "
+              "JOIN teaching_assignments ta ON s.id = ta.section_id "
+              "WHERE ta.teacher_id = ? ORDER BY CAST(g.name AS INTEGER) ASC");
+    q.addBindValue(teacherId);
+    if (q.exec()) {
+        while (q.next()) {
+            list.push_back({q.value("id").toInt(), q.value("name").toString()});
+        }
+    }
+    return list;
+}
+
+QVector<Section> UserManager::getTeacherSections(int teacherId, int gradeId) const {
+    QVector<Section> list;
+    QSqlQuery sq;
+    sq.prepare("SELECT DISTINCT s.id, s.name FROM sections s "
+               "JOIN teaching_assignments ta ON s.id = ta.section_id "
+               "WHERE ta.teacher_id = ? AND s.grade_id = ?");
+    sq.addBindValue(teacherId);
+    sq.addBindValue(gradeId);
+    if (sq.exec()) {
+        while (sq.next()) {
+            Section s;
+            s.id = sq.value("id").toInt();
+            s.name = sq.value("name").toString();
+            list.push_back(s);
+        }
+    }
+    return list;
+}
+
+QVector<Subject> UserManager::getTeacherSubjects(int teacherId, int sectionId) const {
+    QVector<Subject> list;
+    QSqlQuery subq;
+    subq.prepare("SELECT DISTINCT sub.id, sub.name FROM subjects sub "
+                 "JOIN teaching_assignments ta ON sub.id = ta.subject_id "
+                 "WHERE ta.teacher_id = ? AND ta.section_id = ?");
+    subq.addBindValue(teacherId);
+    subq.addBindValue(sectionId);
+    if (subq.exec()) {
+        while (subq.next()) {
+            Subject s;
+            s.id = subq.value("id").toInt();
+            s.name = subq.value("name").toString();
+            list.push_back(s);
+        }
+    }
+    return list;
+}
+
+QVector<Teacher> UserManager::getTeachersBySubject(int subjectId) const {
+    QVector<Teacher> list;
+    QSqlQuery q;
+    q.prepare("SELECT id, fullName FROM teachers WHERE subject_id = ?");
+    q.addBindValue(subjectId);
+    if (q.exec()) {
+        while (q.next()) {
+            Teacher t;
+            t.id = q.value("id").toInt();
+            t.fullName = q.value("fullName").toString();
+            list.push_back(t);
+        }
+    }
+    return list;
+}

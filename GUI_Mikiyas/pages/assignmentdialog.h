@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QComboBox>
 #include "../managers/subjectmanager.h"
+#include "../managers/sectionmanager.h"
+#include "../managers/usermanager.h"
 
 class AssignmentDialog : public QDialog {
     Q_OBJECT
@@ -23,6 +25,8 @@ private:
     QComboBox *teacherCombo;
     
     SubjectManager subManager;
+    SectionManager sectionManager;
+    UserManager userManager;
 };
 
 #endif // ASSIGNMENTDIALOG_H

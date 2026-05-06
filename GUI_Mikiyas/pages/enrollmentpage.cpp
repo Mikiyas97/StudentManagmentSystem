@@ -4,7 +4,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHeaderView>
-#include <QSqlQuery>
 #include <QDoubleSpinBox>
 #include <QMessageBox>
 
@@ -28,27 +27,17 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
 
         if (userRole == "teacher") {
             // Load only assigned grades for this teacher
-            QSqlQuery gq;
-            gq.prepare("SELECT DISTINCT g.id, g.name FROM grade_levels g "
-                       "JOIN sections s ON g.id = s.grade_id "
-                       "JOIN teaching_assignments ta ON s.id = ta.section_id "
-                       "WHERE ta.teacher_id = ? ORDER BY CAST(g.name AS INTEGER) ASC");
-            gq.addBindValue(userStudentId);
-            if (gq.exec()) {
-                while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+            auto grades = userManager.getTeacherGrades(userStudentId);
+            for (const auto& g : grades) {
+                gradeCombo->addItem(g.name, g.id);
             }
 
             auto updateSections = [this]() {
                 sectionFilter->clear();
                 int gradeId = gradeCombo->currentData().toInt();
-                QSqlQuery sq;
-                sq.prepare("SELECT DISTINCT s.id, s.name FROM sections s "
-                           "JOIN teaching_assignments ta ON s.id = ta.section_id "
-                           "WHERE ta.teacher_id = ? AND s.grade_id = ?");
-                sq.addBindValue(userStudentId);
-                sq.addBindValue(gradeId);
-                if (sq.exec()) {
-                    while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
+                auto sections = userManager.getTeacherSections(userStudentId, gradeId);
+                for (const auto& s : sections) {
+                    sectionFilter->addItem(s.name, s.id);
                 }
             };
             connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
@@ -58,38 +47,29 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
             auto updateSubjects = [this](int) {
                 subjectFilter->clear();
                 int secId = sectionFilter->currentData().toInt();
-                QSqlQuery subq;
-                subq.prepare("SELECT DISTINCT sub.id, sub.name FROM subjects sub "
-                             "JOIN teaching_assignments ta ON sub.id = ta.subject_id "
-                             "WHERE ta.teacher_id = ? AND ta.section_id = ?");
-                subq.addBindValue(userStudentId);
-                subq.addBindValue(secId);
-                if (subq.exec()) {
-                    while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
+                auto subjects = userManager.getTeacherSubjects(userStudentId, secId);
+                for (const auto& sub : subjects) {
+                    subjectFilter->addItem(sub.name, sub.id);
                 }
             };
             connect(sectionFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSubjects);
             updateSubjects(0); // initial load
         } else {
             // Admin: Load all grades, sections and subjects
-            QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-            while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+            auto grades = sectionManager.getAllGrades();
+            for (const auto& g : grades) gradeCombo->addItem(g.name, g.id);
 
             auto updateSections = [this]() {
                 sectionFilter->clear();
                 int gradeId = gradeCombo->currentData().toInt();
-                QSqlQuery sq;
-                sq.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
-                sq.addBindValue(gradeId);
-                if (sq.exec()) {
-                    while (sq.next()) sectionFilter->addItem(sq.value("name").toString(), sq.value("id").toInt());
-                }
+                auto sections = sectionManager.getSectionsByGrade(gradeId);
+                for (const auto& s : sections) sectionFilter->addItem(s.name, s.id);
             };
             connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
             updateSections();
 
-            QSqlQuery subq("SELECT id, name FROM subjects");
-            while (subq.next()) subjectFilter->addItem(subq.value("name").toString(), subq.value("id").toInt());
+            auto subjects = subjectManager.getAllSubjects();
+            for (const auto& sub : subjects) subjectFilter->addItem(sub.name, sub.id);
         }
 
         semesterFilter = new QComboBox;
@@ -142,36 +122,22 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
 void EnrollmentPage::refreshTable() {
     table->setRowCount(0);
     if (userRole == "student") {
-        QSqlQuery query;
-        query.prepare("SELECT m.semester, sub.name, m.score FROM marks m "
-                      "JOIN subjects sub ON m.subject_id = sub.id "
-                      "WHERE m.student_id = ? ORDER BY m.semester ASC, sub.name ASC");
-        query.addBindValue(userStudentId);
         double total = 0;
         int count = 0;
-        if (query.exec()) {
-            while (query.next()) {
-                int r = table->rowCount();
-                table->insertRow(r);
-                table->setItem(r, 0, new QTableWidgetItem(QString::number(query.value(0).toInt())));
-                table->setItem(r, 1, new QTableWidgetItem(query.value(1).toString()));
-                double score = query.value(2).toDouble();
-                table->setItem(r, 2, new QTableWidgetItem(QString::number(score, 'f', 1)));
-                table->setItem(r, 3, new QTableWidgetItem(score >= 40 ? "Pass" : "Fail"));
-                total += score;
-                count++;
-            }
+        auto marks = manager.getStudentMarks(userStudentId);
+        for (const auto& m : marks) {
+            int r = table->rowCount();
+            table->insertRow(r);
+            table->setItem(r, 0, new QTableWidgetItem(QString::number(m.semester)));
+            table->setItem(r, 1, new QTableWidgetItem(m.subjectName));
+            table->setItem(r, 2, new QTableWidgetItem(QString::number(m.score, 'f', 1)));
+            table->setItem(r, 3, new QTableWidgetItem(m.score >= 40 ? "Pass" : "Fail"));
+            total += m.score;
+            count++;
         }
         // --- Rank Calculation Logic ---
-        int sectionId = 0;
-        int yearId = 1; // Default to first year
-        QSqlQuery sq;
-        sq.prepare("SELECT section_id FROM students WHERE id = ?");
-        sq.addBindValue(userStudentId);
-        if (sq.exec() && sq.next()) sectionId = sq.value(0).toInt();
-
-        QSqlQuery yq("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
-        if (yq.next()) yearId = yq.value(0).toInt();
+        int sectionId = manager.getStudentSectionId(userStudentId);
+        int yearId = manager.getLatestYearId();
 
         // Let's assume we want the rank for the latest semester (Semester 1 for now)
         int currentSemester = 1;
@@ -203,26 +169,17 @@ void EnrollmentPage::onFilter() {
     int subjectId = subjectFilter->currentData().toInt();
     int semester = semesterFilter->currentData().toInt();
 
-    QSqlQuery query;
-    query.prepare("SELECT s.id, s.fullName, (SELECT score FROM marks WHERE student_id = s.id AND subject_id = ? AND semester = ?) as score "
-                  "FROM students s "
-                  "WHERE s.section_id = ?");
-    query.addBindValue(subjectId);
-    query.addBindValue(semester);
-    query.addBindValue(sectionId);
-
-    if (query.exec()) {
-        while (query.next()) {
-            int r = table->rowCount();
-            table->insertRow(r);
-            table->setItem(r, 0, new QTableWidgetItem(QString::number(query.value(0).toInt())));
-            table->setItem(r, 1, new QTableWidgetItem(query.value(1).toString()));
-            
-            QDoubleSpinBox *spin = new QDoubleSpinBox;
-            spin->setRange(0, 100);
-            spin->setValue(query.value(2).toDouble());
-            table->setCellWidget(r, 2, spin);
-        }
+    auto students = manager.getStudentsWithMarks(sectionId, subjectId, semester);
+    for (const auto& student : students) {
+        int r = table->rowCount();
+        table->insertRow(r);
+        table->setItem(r, 0, new QTableWidgetItem(QString::number(student.studentId)));
+        table->setItem(r, 1, new QTableWidgetItem(student.fullName));
+        
+        QDoubleSpinBox *spin = new QDoubleSpinBox;
+        spin->setRange(0, 100);
+        spin->setValue(student.score);
+        table->setCellWidget(r, 2, spin);
     }
 }
 
@@ -230,9 +187,7 @@ void EnrollmentPage::onSaveAll() {
     int sectionId = sectionFilter->currentData().toInt();
     int subjectId = subjectFilter->currentData().toInt();
     int semester = semesterFilter->currentData().toInt();
-    int yearId = 1;
-    QSqlQuery yearQ("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
-    if (yearQ.next()) yearId = yearQ.value(0).toInt();
+    int yearId = manager.getLatestYearId();
 
     for (int i = 0; i < table->rowCount(); ++i) {
         int sid = table->item(i, 0)->text().toInt();

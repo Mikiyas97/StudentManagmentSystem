@@ -6,7 +6,6 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QGroupBox>
-#include <QSqlQuery>
 
 StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *parent)
     : QDialog(parent), editing(editMode)
@@ -54,9 +53,9 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
     aLayout->addRow("Date of Birth:", dobEdit);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (gq.next()) {
-        gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    auto grades = sectionManager.getAllGrades();
+    for (const auto& g : grades) {
+        gradeCombo->addItem(g.name, g.id);
     }
     aLayout->addRow("Grade Level:", gradeCombo);
 
@@ -64,11 +63,9 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
     auto updateSections = [this](int) {
         sectionCombo->clear();
         int gradeId = gradeCombo->currentData().toInt();
-        QSqlQuery sq;
-        sq.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
-        sq.addBindValue(gradeId);
-        if (sq.exec()) {
-            while (sq.next()) sectionCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+        auto sections = sectionManager.getSectionsByGrade(gradeId);
+        for (const auto& s : sections) {
+            sectionCombo->addItem(s.name, s.id);
         }
     };
     connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
@@ -76,9 +73,9 @@ StudentFormDialog::StudentFormDialog(const Student &s, bool editMode, QWidget *p
 
     streamCombo = new QComboBox;
     streamCombo->addItem("None", 0);
-    QSqlQuery stq("SELECT id, name FROM streams");
-    while (stq.next()) {
-        streamCombo->addItem(stq.value("name").toString(), stq.value("id").toInt());
+    auto streams = sectionManager.getAllStreams();
+    for (const auto& st : streams) {
+        streamCombo->addItem(st.name, st.id);
     }
     
     auto updateStreamLogic = [this](int) {

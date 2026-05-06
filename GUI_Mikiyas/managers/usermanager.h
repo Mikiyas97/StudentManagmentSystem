@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QVector>
+#include "sectionmanager.h"
+#include "subjectmanager.h"
 
 struct Teacher {
     int id;
@@ -37,6 +39,12 @@ public:
     QVector<Teacher> filterTeachers(const QString &searchText, const QString &sortBy = "") const;
     Teacher getTeacherById(int id) const;
     bool deleteTeacher(int id);
+    
+    // Teaching Assignments (Moved from pages)
+    QVector<GradeLevel> getTeacherGrades(int teacherId) const;
+    QVector<Section> getTeacherSections(int teacherId, int gradeId) const;
+    QVector<Subject> getTeacherSubjects(int teacherId, int sectionId) const;
+    QVector<Teacher> getTeachersBySubject(int subjectId) const;
 };
 
 #endif // USERMANAGER_H

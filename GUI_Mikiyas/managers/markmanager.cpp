@@ -80,3 +80,71 @@ bool MarkManager::isRankingApproved(int sectionId, int yearId, int semester) con
     }
     return false;
 }
+
+bool MarkManager::approveRanking(int sectionId, int yearId, int semester) {
+    QSqlQuery query;
+    query.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, semester, is_approved) VALUES (?, ?, ?, 1)");
+    query.addBindValue(sectionId);
+    query.addBindValue(yearId);
+    query.addBindValue(semester);
+    return query.exec();
+}
+
+QVector<StudentMark> MarkManager::getStudentMarks(int studentId) const {
+    QVector<StudentMark> list;
+    QSqlQuery query;
+    query.prepare("SELECT m.semester, sub.name, m.score FROM marks m "
+                  "JOIN subjects sub ON m.subject_id = sub.id "
+                  "WHERE m.student_id = ? ORDER BY m.semester ASC, sub.name ASC");
+    query.addBindValue(studentId);
+    if (query.exec()) {
+        while (query.next()) {
+            StudentMark sm;
+            sm.semester = query.value(0).toInt();
+            sm.subjectName = query.value(1).toString();
+            sm.score = query.value(2).toDouble();
+            list.push_back(sm);
+        }
+    }
+    return list;
+}
+
+QVector<StudentMarkEntry> MarkManager::getStudentsWithMarks(int sectionId, int subjectId, int semester) const {
+    QVector<StudentMarkEntry> list;
+    QSqlQuery query;
+    query.prepare("SELECT s.id, s.fullName, (SELECT score FROM marks WHERE student_id = s.id AND subject_id = ? AND semester = ?) as score "
+                  "FROM students s "
+                  "WHERE s.section_id = ?");
+    query.addBindValue(subjectId);
+    query.addBindValue(semester);
+    query.addBindValue(sectionId);
+
+    if (query.exec()) {
+        while (query.next()) {
+            StudentMarkEntry e;
+            e.studentId = query.value(0).toInt();
+            e.fullName = query.value(1).toString();
+            e.score = query.value(2).toDouble(); // will be 0 if no score
+            list.push_back(e);
+        }
+    }
+    return list;
+}
+
+int MarkManager::getLatestYearId() const {
+    QSqlQuery yq("SELECT id FROM academic_years ORDER BY name DESC LIMIT 1");
+    if (yq.next()) {
+        return yq.value(0).toInt();
+    }
+    return 1; // Default
+}
+
+int MarkManager::getStudentSectionId(int studentId) const {
+    QSqlQuery sq;
+    sq.prepare("SELECT section_id FROM students WHERE id = ?");
+    sq.addBindValue(studentId);
+    if (sq.exec() && sq.next()) {
+        return sq.value(0).toInt();
+    }
+    return 0;
+}

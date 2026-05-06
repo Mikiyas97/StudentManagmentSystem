@@ -6,6 +6,9 @@
 #include <QComboBox>
 #include <QLabel>
 #include "../managers/markmanager.h"
+#include "../managers/sectionmanager.h"
+#include "../managers/subjectmanager.h"
+#include "../managers/usermanager.h"
 
 class EnrollmentPage : public QWidget {
     Q_OBJECT
@@ -19,6 +22,10 @@ private slots:
 
 private:
     MarkManager manager;
+    SectionManager sectionManager;
+    SubjectManager subjectManager;
+    UserManager userManager;
+    
     QTableWidget *table;
     QComboBox *gradeCombo;
     QComboBox *streamCombo;

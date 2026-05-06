@@ -22,6 +22,18 @@ struct RankInfo {
     int rank;
 };
 
+struct StudentMark {
+    int semester;
+    QString subjectName;
+    double score;
+};
+
+struct StudentMarkEntry {
+    int studentId;
+    QString fullName;
+    double score;
+};
+
 class MarkManager {
 public:
     MarkManager();
@@ -30,6 +42,13 @@ public:
     double getStudentAverage(int studentId, int yearId, int semester) const;
     QVector<RankInfo> calculateSectionRanking(int sectionId, int yearId, int semester) const;
     bool isRankingApproved(int sectionId, int yearId, int semester) const;
+    bool approveRanking(int sectionId, int yearId, int semester);
+    
+    // Queries moved from pages
+    QVector<StudentMark> getStudentMarks(int studentId) const;
+    QVector<StudentMarkEntry> getStudentsWithMarks(int sectionId, int subjectId, int semester) const;
+    int getLatestYearId() const;
+    int getStudentSectionId(int studentId) const;
 };
 
 #endif // MARKMANAGER_H

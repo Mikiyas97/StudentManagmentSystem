@@ -5,7 +5,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHeaderView>
-#include <QSqlQuery>
 #include <QMessageBox>
 #include <QComboBox>
 #include <QLineEdit>
@@ -26,8 +25,8 @@ OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     inputLayout->setContentsMargins(0, 0, 0, 0);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    auto grades = manager.getAllGrades();
+    for (const auto& g : grades) gradeCombo->addItem(g.name, g.id);
     inputLayout->addWidget(new QLabel("Grade:"));
     inputLayout->addWidget(gradeCombo);
 
@@ -38,8 +37,8 @@ OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     inputLayout->addWidget(sectionNameEdit);
 
     yearCombo = new QComboBox;
-    QSqlQuery yq("SELECT id, name FROM academic_years ORDER BY name DESC");
-    while (yq.next()) yearCombo->addItem(yq.value("name").toString(), yq.value("id").toInt());
+    auto years = manager.getAllYears();
+    for (const auto& y : years) yearCombo->addItem(y.name, y.id);
     inputLayout->addWidget(new QLabel("Year:"));
     inputLayout->addWidget(yearCombo);
 

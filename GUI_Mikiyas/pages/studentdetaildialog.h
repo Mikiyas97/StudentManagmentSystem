@@ -4,6 +4,8 @@
 #include <QDialog>
 #include "../managers/studentmanager.h"
 
+#include "../managers/markmanager.h"
+
 class StudentDetailDialog : public QDialog {
     Q_OBJECT
 public:
@@ -14,6 +16,7 @@ signals:
 
 private:
     Student student;
+    MarkManager markManager;
 };
 
 #endif // STUDENTDETAILDIALOG_H

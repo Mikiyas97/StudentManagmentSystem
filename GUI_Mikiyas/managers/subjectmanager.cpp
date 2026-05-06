@@ -5,6 +5,57 @@
 
 SubjectManager::SubjectManager() {}
 
+QVector<Subject> SubjectManager::getAllSubjects() const {
+    QVector<Subject> list;
+    QSqlQuery query("SELECT * FROM subjects ORDER BY name ASC");
+    while (query.next()) {
+        Subject s;
+        s.id = query.value("id").toInt();
+        s.name = query.value("name").toString();
+        s.grade_id = query.value("grade_id").toInt();
+        s.stream_id = query.value("stream_id").toInt();
+        list.push_back(s);
+    }
+    return list;
+}
+
+QVector<SubjectDetail> SubjectManager::getSubjectsWithDetails() const {
+    QVector<SubjectDetail> list;
+    QSqlQuery query("SELECT s.*, g.name as grade_name, st.name as stream_name "
+                   "FROM subjects s "
+                   "JOIN grade_levels g ON s.grade_id = g.id "
+                   "LEFT JOIN streams st ON s.stream_id = st.id");
+    while (query.next()) {
+        SubjectDetail d;
+        d.id = query.value("id").toInt();
+        d.name = query.value("name").toString();
+        d.gradeName = query.value("grade_name").toString();
+        d.streamName = query.value("stream_name").toString();
+        list.push_back(d);
+    }
+    return list;
+}
+
+QVector<Subject> SubjectManager::getSubjectsForSection(int sectionId) const {
+    QVector<Subject> list;
+    QSqlQuery query;
+    query.prepare("SELECT sub.id, sub.name, sub.grade_id, sub.stream_id FROM subjects sub "
+                  "JOIN sections sec ON sub.grade_id = sec.grade_id "
+                  "WHERE sec.id = ?");
+    query.addBindValue(sectionId);
+    if (query.exec()) {
+        while (query.next()) {
+            Subject s;
+            s.id = query.value("id").toInt();
+            s.name = query.value("name").toString();
+            s.grade_id = query.value("grade_id").toInt();
+            s.stream_id = query.value("stream_id").toInt();
+            list.push_back(s);
+        }
+    }
+    return list;
+}
+
 bool SubjectManager::addSubject(const QString &name, int gradeId, int streamId) {
     QSqlQuery query;
     query.prepare("INSERT INTO subjects (name, grade_id, stream_id) VALUES (?, ?, ?)");

@@ -31,7 +31,7 @@ void ProfilePage::setupAdminProfile() {
 void ProfilePage::setupTeacherProfile(int id) {
     UserManager um;
     Teacher t = um.getTeacherById(id);
-    
+
     QGroupBox *box = new QGroupBox("Teacher Details");
     QFormLayout *form = new QFormLayout(box);
     form->addRow("Teacher ID:", new QLabel(QString::number(t.id)));
@@ -44,7 +44,7 @@ void ProfilePage::setupTeacherProfile(int id) {
 void ProfilePage::setupStudentProfile(int id) {
     StudentManager sm;
     Student s = sm.getStudentById(id);
-    
+
     QGroupBox *box = new QGroupBox("Student Details");
     QFormLayout *form = new QFormLayout(box);
     form->addRow("Student ID:", new QLabel(QString::number(s.id)));

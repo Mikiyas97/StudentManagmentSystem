@@ -1,4 +1,0 @@
-2|2|0|Unknown|||||||Active
-1234|abebe|0|Unknown|||||||Inactive
-1700915|Mikiyas Abebeyas|21|Male|computer science|25197000789|mikiyasabebe@gmail.com|addis ababa|abebe kebede|25170456789|Active
-1700916|Mikiyas Hululaem|20|Male|Software Engineering|+251970000789|mikiyashulualem@gmail.com|debre birhan|Hulualem Abebe|+251913202889|Active

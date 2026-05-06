@@ -4,7 +4,8 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QComboBox>
-#include "managers/usermanager.h"
+#include "../managers/usermanager.h"
+#include "../managers/subjectmanager.h"
 
 class TeacherFormDialog : public QDialog {
     Q_OBJECT
@@ -24,6 +25,7 @@ private:
     QLineEdit *emailEdit;
     QComboBox *subjectCombo;
     
+    SubjectManager subjectManager;
     Teacher resultTeacher;
 };
 

@@ -9,7 +9,6 @@
 
 #include <QTableWidget>
 #include <QHeaderView>
-#include <QSqlQuery>
 
 static QLabel* makeValue(const QString &text) {
     QLabel *lbl = new QLabel(text.isEmpty() ? "—" : text);
@@ -87,24 +86,17 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     marksTable->setStyleSheet("QTableWidget { background-color: #16213e; border-radius: 4px; gridline-color: #1f4068; }"
                               "QHeaderView::section { background-color: #0f3460; color: white; padding: 4px; }");
     
-    QSqlQuery mq;
-    mq.prepare("SELECT m.semester, sub.name, m.score FROM marks m "
-               "JOIN subjects sub ON m.subject_id = sub.id "
-               "WHERE m.student_id = ? ORDER BY m.semester ASC, sub.name ASC");
-    mq.addBindValue(s.id);
-    if (mq.exec()) {
-        while (mq.next()) {
-            int r = marksTable->rowCount();
-            marksTable->insertRow(r);
-            marksTable->setItem(r, 0, new QTableWidgetItem(QString::number(mq.value(0).toInt())));
-            marksTable->setItem(r, 1, new QTableWidgetItem(mq.value(1).toString()));
-            double score = mq.value(2).toDouble();
-            marksTable->setItem(r, 2, new QTableWidgetItem(QString::number(score, 'f', 1)));
-            
-            QTableWidgetItem *statusItem = new QTableWidgetItem(score >= 40 ? "Pass" : "Fail");
-            statusItem->setForeground(score >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
-            marksTable->setItem(r, 3, statusItem);
-        }
+    auto marks = markManager.getStudentMarks(s.id);
+    for (const auto& m : marks) {
+        int r = marksTable->rowCount();
+        marksTable->insertRow(r);
+        marksTable->setItem(r, 0, new QTableWidgetItem(QString::number(m.semester)));
+        marksTable->setItem(r, 1, new QTableWidgetItem(m.subjectName));
+        marksTable->setItem(r, 2, new QTableWidgetItem(QString::number(m.score, 'f', 1)));
+        
+        QTableWidgetItem *statusItem = new QTableWidgetItem(m.score >= 40 ? "Pass" : "Fail");
+        statusItem->setForeground(m.score >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
+        marksTable->setItem(r, 3, statusItem);
     }
     marksLayout->addWidget(marksTable);
     main->addWidget(marksGroup);

@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include "../managers/subjectmanager.h"
+#include "../managers/sectionmanager.h"
 
 class CoursePage : public QWidget {
     Q_OBJECT
@@ -19,6 +20,7 @@ private slots:
 
 private:
     SubjectManager manager;
+    SectionManager sectionManager;
     QTableWidget *table;
     QLineEdit *nameEdit;
     QComboBox *gradeCombo;

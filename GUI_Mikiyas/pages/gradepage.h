@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include "../managers/markmanager.h"
+#include "../managers/sectionmanager.h"
 
 class GradePage : public QWidget {
     Q_OBJECT
@@ -20,6 +21,7 @@ private slots:
 
 private:
     MarkManager manager;
+    SectionManager sectionManager;
     QTableWidget *table;
     QComboBox *gradeCombo;
     QComboBox *streamCombo;

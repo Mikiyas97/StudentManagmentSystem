@@ -11,12 +11,22 @@ struct Subject {
     int stream_id; // 0 for General
 };
 
+struct SubjectDetail {
+    int id;
+    QString name;
+    QString gradeName;
+    QString streamName;
+};
+
 class SubjectManager {
 public:
     SubjectManager();
     
     bool addSubject(const QString &name, int gradeId, int streamId = 0);
     QVector<Subject> getSubjectsByGrade(int gradeId, int streamId = 0) const;
+    QVector<Subject> getAllSubjects() const;
+    QVector<SubjectDetail> getSubjectsWithDetails() const;
+    QVector<Subject> getSubjectsForSection(int sectionId) const;
     bool deleteSubject(int id);
     bool assignTeacherToSubject(int teacherId, int subjectId, int sectionId, int yearId);
 };

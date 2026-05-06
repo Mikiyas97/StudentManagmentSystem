@@ -36,6 +36,7 @@ private:
     QWidget *bulkBar;
     QLabel *selectionLabel;
     UserManager manager;
+    SubjectManager subjectManager;
     
     QVector<int> getCheckedIds() const;
 };

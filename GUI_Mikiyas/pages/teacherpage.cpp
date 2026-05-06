@@ -8,8 +8,6 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QGroupBox>
-#include <QSqlQuery>
-#include <QSqlError>
 #include "../managers/subjectmanager.h"
 
 #include <QCheckBox>
@@ -167,7 +165,7 @@ void TeacherPage::onEditTeacher(int /*id*/) {
 }
 
 void TeacherPage::onDeleteTeacher(int id) {
-    if (QMessageBox::question(this, "Confirm", "Delete teacher ID " + QString::number(id) + "?") == QMessageBox::Yes) {
+    if (QMessageBox::question(this, "Confirm Delete", "Permanently delete teacher ID " + QString::number(id) + "?") == QMessageBox::Yes) {
         if (manager.deleteTeacher(id)) {
             refreshTable();
         } else {
@@ -211,8 +209,8 @@ void TeacherPage::refreshTable() {
     subjectFilterCombo->blockSignals(true);
     subjectFilterCombo->clear();
     subjectFilterCombo->addItem("All");
-    QSqlQuery qsub("SELECT name FROM subjects ORDER BY name ASC");
-    while (qsub.next()) subjectFilterCombo->addItem(qsub.value(0).toString());
+    auto subjects = subjectManager.getAllSubjects();
+    for (const auto& sub : subjects) subjectFilterCombo->addItem(sub.name);
     int idx = subjectFilterCombo->findText(prevSub);
     if (idx >= 0) subjectFilterCombo->setCurrentIndex(idx);
     subjectFilterCombo->blockSignals(false);

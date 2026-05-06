@@ -11,8 +11,6 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QCheckBox>
-#include <QSqlQuery>
-#include <QSqlError>
 
 StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget(parent), userRole(role)
 {
@@ -101,7 +99,7 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget
     selectionLabel->setStyleSheet("color: #eaeaea; font-weight: bold; background: transparent;");
     bulkLayout->addWidget(selectionLabel);
 
-    QPushButton *bulkDeleteBtn = new QPushButton("Bulk Deactivate");
+    QPushButton *bulkDeleteBtn = new QPushButton("Bulk Delete");
     bulkDeleteBtn->setStyleSheet(
         "QPushButton { background-color: #c0392b; padding: 6px 14px; }"
         "QPushButton:hover { background-color: #a93226; }");
@@ -165,8 +163,8 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget
 
 QStringList StudentPage::getUniqueClasses() const {
     QStringList grades;
-    QSqlQuery query("SELECT name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (query.next()) grades << query.value(0).toString();
+    auto gradesList = sectionManager.getAllGrades();
+    for (const auto& g : gradesList) grades << g.name;
     return grades;
 }
 
@@ -276,10 +274,9 @@ void StudentPage::refreshTable() {
         connect(editBtn, &QPushButton::clicked, this, [this, sid]() { editStudentById(sid); });
         connect(delBtn,  &QPushButton::clicked, this, [this, sid]() {
             if (QMessageBox::question(this, "Confirm Delete",
-                "This will deactivate student ID " + QString::number(sid) +
-                ".\n\nTo permanently remove, hold Shift and click Delete.\n\nProceed?",
+                "This will permanently delete student ID " + QString::number(sid) + ".\n\nProceed?",
                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-                manager.softDeleteStudent(sid);
+                manager.hardDeleteStudent(sid);
                 refreshTable();
             }
         });
@@ -353,9 +350,10 @@ void StudentPage::onDeleteStudent() {
     int row = table->currentRow();
     if (row < 0) { QMessageBox::warning(this, "Error", "Select a student."); return; }
     int id = table->item(row, 1)->text().toInt();
-    if (QMessageBox::question(this, "Confirm",
-        "Deactivate student ID " + QString::number(id) + "?") == QMessageBox::Yes) {
-        manager.softDeleteStudent(id);
+    if (QMessageBox::question(this, "Confirm Delete",
+        "This will permanently delete student ID " + QString::number(id) + ".\n\nProceed?",
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+        manager.hardDeleteStudent(id);
         refreshTable();
     }
 }
@@ -365,9 +363,9 @@ void StudentPage::onDeleteStudent() {
 void StudentPage::onBulkDelete() {
     QVector<int> ids = getCheckedIds();
     if (ids.isEmpty()) return;
-    if (QMessageBox::question(this, "Bulk Deactivate",
-        "Deactivate " + QString::number(ids.size()) + " student(s)?") == QMessageBox::Yes) {
-        manager.bulkSoftDelete(ids);
+    if (QMessageBox::question(this, "Bulk Delete",
+        "Permanently delete " + QString::number(ids.size()) + " student(s)?") == QMessageBox::Yes) {
+        manager.bulkHardDelete(ids);
         refreshTable();
     }
 }

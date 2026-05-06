@@ -2,7 +2,6 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QPushButton>
-#include <QSqlQuery>
 #include <QMessageBox>
 #include <QLabel>
 
@@ -23,8 +22,8 @@ AssignmentDialog::AssignmentDialog(QWidget *parent) : QDialog(parent) {
     form->setSpacing(15);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (gq.next()) gradeCombo->addItem("Grade " + gq.value("name").toString(), gq.value("id").toInt());
+    auto grades = sectionManager.getAllGrades();
+    for (const auto& g : grades) gradeCombo->addItem("Grade " + g.name, g.id);
 
     sectionCombo = new QComboBox;
     subjectCombo = new QComboBox;
@@ -60,12 +59,8 @@ AssignmentDialog::AssignmentDialog(QWidget *parent) : QDialog(parent) {
 void AssignmentDialog::onGradeChanged() {
     sectionCombo->clear();
     int gradeId = gradeCombo->currentData().toInt();
-    QSqlQuery q;
-    q.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
-    q.addBindValue(gradeId);
-    if (q.exec()) {
-        while (q.next()) sectionCombo->addItem(q.value("name").toString(), q.value("id").toInt());
-    }
+    auto sections = sectionManager.getSectionsByGrade(gradeId);
+    for (const auto& s : sections) sectionCombo->addItem(s.name, s.id);
     onSectionChanged(); // Update subjects based on first section
 }
 
@@ -74,14 +69,8 @@ void AssignmentDialog::onSectionChanged() {
     int sectionId = sectionCombo->currentData().toInt();
     
     // Get subjects for this section's grade
-    QSqlQuery q;
-    q.prepare("SELECT sub.id, sub.name FROM subjects sub "
-              "JOIN sections sec ON sub.grade_id = sec.grade_id "
-              "WHERE sec.id = ?");
-    q.addBindValue(sectionId);
-    if (q.exec()) {
-        while (q.next()) subjectCombo->addItem(q.value("name").toString(), q.value("id").toInt());
-    }
+    auto subjects = subManager.getSubjectsForSection(sectionId);
+    for (const auto& sub : subjects) subjectCombo->addItem(sub.name, sub.id);
 }
 
 void AssignmentDialog::onSubjectChanged() {
@@ -89,12 +78,8 @@ void AssignmentDialog::onSubjectChanged() {
     int subjectId = subjectCombo->currentData().toInt();
     
     // Rule 1: Only show teachers who specialize in this subject
-    QSqlQuery q;
-    q.prepare("SELECT id, fullName FROM teachers WHERE subject_id = ?");
-    q.addBindValue(subjectId);
-    if (q.exec()) {
-        while (q.next()) teacherCombo->addItem(q.value("fullName").toString(), q.value("id").toInt());
-    }
+    auto teachers = userManager.getTeachersBySubject(subjectId);
+    for (const auto& t : teachers) teacherCombo->addItem(t.fullName, t.id);
 }
 
 void AssignmentDialog::onAssign() {

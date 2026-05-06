@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include "../managers/studentmanager.h"
+#include "../managers/sectionmanager.h"
 
 class StudentPage : public QWidget {
     Q_OBJECT
@@ -30,6 +31,7 @@ private slots:
 
 private:
     StudentManager manager;
+    SectionManager sectionManager;
     QTableWidget *table;
     QLineEdit *searchEdit;
     QComboBox *classFilterCombo;

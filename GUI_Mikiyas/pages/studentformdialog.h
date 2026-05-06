@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include "../managers/studentmanager.h"
+#include "../managers/sectionmanager.h"
 
 class StudentFormDialog : public QDialog {
     Q_OBJECT
@@ -21,6 +22,7 @@ private slots:
 
 private:
     bool editing;
+    SectionManager sectionManager;
     QSpinBox    *idSpin;
     QLineEdit   *nameEdit;
     QComboBox   *genderCombo;

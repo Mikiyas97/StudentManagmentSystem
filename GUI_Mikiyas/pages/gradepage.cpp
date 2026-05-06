@@ -4,7 +4,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHeaderView>
-#include <QSqlQuery>
 #include <QMessageBox>
 
 GradePage::GradePage(const QString &role, int id, QWidget *parent)
@@ -23,16 +22,16 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     
     // Grade Filter
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    auto grades = sectionManager.getAllGrades();
+    for (const auto& g : grades) gradeCombo->addItem(g.name, g.id);
     controls->addWidget(new QLabel("Grade:"));
     controls->addWidget(gradeCombo);
 
     // Stream Filter (enabled only for Grade 11/12)
     streamCombo = new QComboBox;
     streamCombo->addItem("General", 0);
-    QSqlQuery stq("SELECT id, name FROM streams");
-    while (stq.next()) streamCombo->addItem(stq.value("name").toString(), stq.value("id").toInt());
+    auto streams = sectionManager.getAllStreams();
+    for (const auto& st : streams) streamCombo->addItem(st.name, st.id);
     controls->addWidget(new QLabel("Stream:"));
     controls->addWidget(streamCombo);
 
@@ -45,12 +44,8 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     auto updateSections = [this]() {
         sectionCombo->clear();
         int gradeId = gradeCombo->currentData().toInt();
-        QSqlQuery sq;
-        sq.prepare("SELECT id, name FROM sections WHERE grade_id = ?");
-        sq.addBindValue(gradeId);
-        if (sq.exec()) {
-            while (sq.next()) sectionCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
-        }
+        auto sections = sectionManager.getSectionsByGrade(gradeId);
+        for (const auto& s : sections) sectionCombo->addItem(s.name, s.id);
         
         QString gradeText = gradeCombo->currentText();
         bool needsStream = (gradeText == "11" || gradeText == "12");
@@ -61,8 +56,8 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     updateSections(); // Initial load
 
     yearCombo = new QComboBox;
-    QSqlQuery yq("SELECT id, name FROM academic_years ORDER BY name DESC");
-    while (yq.next()) yearCombo->addItem(yq.value("name").toString(), yq.value("id").toInt());
+    auto years = sectionManager.getAllYears();
+    for (const auto& y : years) yearCombo->addItem(y.name, y.id);
     controls->addWidget(new QLabel("Year:"));
     controls->addWidget(yearCombo);
 
@@ -129,13 +124,7 @@ void GradePage::onApprove() {
     int yearId = yearCombo->currentData().toInt();
     int semester = semesterCombo->currentData().toInt();
 
-    QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, semester, is_approved) VALUES (?, ?, ?, 1)");
-    q.addBindValue(sectionId);
-    q.addBindValue(yearId);
-    q.addBindValue(semester);
-    
-    if (q.exec()) {
+    if (manager.approveRanking(sectionId, yearId, semester)) {
         QMessageBox::information(this, "Success", "Ranking has been approved and is now visible to students.");
     } else {
         QMessageBox::warning(this, "Error", "Failed to approve ranking.");

@@ -3,7 +3,6 @@
 #include <QFormLayout>
 #include <QPushButton>
 #include <QLabel>
-#include <QSqlQuery>
 #include <QMessageBox>
 
 TeacherFormDialog::TeacherFormDialog(QWidget *parent) : QDialog(parent) {
@@ -25,8 +24,8 @@ TeacherFormDialog::TeacherFormDialog(QWidget *parent) : QDialog(parent) {
     emailEdit = new QLineEdit;
     
     subjectCombo = new QComboBox;
-    QSqlQuery sq("SELECT id, name FROM subjects");
-    while (sq.next()) subjectCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+    auto subjects = subjectManager.getAllSubjects();
+    for (const auto& sub : subjects) subjectCombo->addItem(sub.name, sub.id);
 
     form->addRow("Full Name:", nameEdit);
     form->addRow("Gender:", genderCombo);

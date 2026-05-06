@@ -5,7 +5,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHeaderView>
-#include <QSqlQuery>
 #include <QMessageBox>
 
 CoursePage::CoursePage(QWidget *parent) : QWidget(parent) {
@@ -27,15 +26,15 @@ CoursePage::CoursePage(QWidget *parent) : QWidget(parent) {
     inputLayout->addWidget(nameEdit, 1);
 
     gradeCombo = new QComboBox;
-    QSqlQuery gq("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
-    while (gq.next()) gradeCombo->addItem(gq.value("name").toString(), gq.value("id").toInt());
+    auto grades = sectionManager.getAllGrades();
+    for (const auto& g : grades) gradeCombo->addItem(g.name, g.id);
     inputLayout->addWidget(new QLabel("Grade:"));
     inputLayout->addWidget(gradeCombo);
 
     streamCombo = new QComboBox;
     streamCombo->addItem("General", 0);
-    QSqlQuery sq("SELECT id, name FROM streams");
-    while (sq.next()) streamCombo->addItem(sq.value("name").toString(), sq.value("id").toInt());
+    auto streams = sectionManager.getAllStreams();
+    for (const auto& st : streams) streamCombo->addItem(st.name, st.id);
     inputLayout->addWidget(new QLabel("Stream:"));
     inputLayout->addWidget(streamCombo);
 
@@ -59,19 +58,14 @@ CoursePage::CoursePage(QWidget *parent) : QWidget(parent) {
 
 void CoursePage::refreshTable() {
     table->setRowCount(0);
-    QSqlQuery query("SELECT s.*, g.name as grade_name, st.name as stream_name "
-                   "FROM subjects s "
-                   "JOIN grade_levels g ON s.grade_id = g.id "
-                   "LEFT JOIN streams st ON s.stream_id = st.id");
-    
-    while (query.next()) {
+    auto subjects = manager.getSubjectsWithDetails();
+    for (const auto& sub : subjects) {
         int r = table->rowCount();
         table->insertRow(r);
-        table->setItem(r, 0, new QTableWidgetItem(query.value("id").toString()));
-        table->setItem(r, 1, new QTableWidgetItem(query.value("name").toString()));
-        table->setItem(r, 2, new QTableWidgetItem(query.value("grade_name").toString()));
-        QString stream = query.value("stream_name").toString();
-        table->setItem(r, 3, new QTableWidgetItem(stream.isEmpty() ? "General" : stream));
+        table->setItem(r, 0, new QTableWidgetItem(QString::number(sub.id)));
+        table->setItem(r, 1, new QTableWidgetItem(sub.name));
+        table->setItem(r, 2, new QTableWidgetItem(sub.gradeName));
+        table->setItem(r, 3, new QTableWidgetItem(sub.streamName.isEmpty() ? "General" : sub.streamName));
     }
 }
 
