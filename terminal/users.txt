@@ -1,3 +1,0 @@
-101 John Doe pass123 Unassigned 0
-1700915 miki hulu 1234 Unassigned 0
-1501850 yon zel 1234 soft 3.9
