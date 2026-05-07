@@ -2,6 +2,7 @@
 #include "../managers/reportmanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QFrame>
@@ -41,26 +42,35 @@ ReportPage::ReportPage(QWidget *parent) : QWidget(parent)
     layout->setSpacing(20);
     layout->setContentsMargins(25, 20, 25, 20);
 
-    QLabel *title = new QLabel("System Report");
+    QLabel *title = new QLabel("Dashboard Overview");
     title->setObjectName("pageTitle");
-    QLabel *subtitle = new QLabel("Summary of all system data");
+    QLabel *subtitle = new QLabel("Real-time summary of school system statistics");
     subtitle->setObjectName("subtitle");
     layout->addWidget(title);
     layout->addWidget(subtitle);
 
-    // Stats cards in a horizontal layout
-    QHBoxLayout *cardsLayout = new QHBoxLayout;
+    // Stats cards in a grid layout
+    QGridLayout *cardsLayout = new QGridLayout;
     cardsLayout->setSpacing(15);
 
-    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x91\xA4"), "Students", studentCount));
-    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x93\x9D"), "Grades", gradeCount));
-    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x93\x9A"), "Courses", courseCount));
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x8E\x93"), "Total Students", studentCount), 0, 0);
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x91\xA4"), "Total Teachers", teacherCount), 0, 1);
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x93\x9A"), "Subjects", courseCount), 0, 2);
+    
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x8F\xAB"), "Sections", sectionCount), 1, 0);
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xF0\x9F\x93\x9D"), "Grade Levels", gradeCount), 1, 1);
+    cardsLayout->addWidget(makeStatCard(QString::fromUtf8("\xE2\x9A\x99\xEF\xB8\x8F"), "Assignments", assignmentCount), 1, 2);
 
     layout->addLayout(cardsLayout);
 
-    QPushButton *refreshBtn = new QPushButton("Refresh Report");
+    QPushButton *refreshBtn = new QPushButton("Refresh Dashboard");
+    refreshBtn->setObjectName("actionButton");
     refreshBtn->setCursor(Qt::PointingHandCursor);
     refreshBtn->setFixedWidth(200);
+    refreshBtn->setStyleSheet(
+        "QPushButton { background-color: #e94560; color: white; padding: 10px; border-radius: 5px; font-weight: bold; border: none; }"
+        "QPushButton:hover { background-color: #ff5e78; }"
+    );
     layout->addWidget(refreshBtn, 0, Qt::AlignCenter);
     layout->addStretch(1);
 
@@ -72,4 +82,7 @@ void ReportPage::onRefresh() {
     studentCount->setText(QString::number(ReportManager::countStudents()));
     gradeCount->setText(QString::number(ReportManager::countGrades()));
     courseCount->setText(QString::number(ReportManager::countCourses()));
+    teacherCount->setText(QString::number(ReportManager::countTeachers()));
+    sectionCount->setText(QString::number(ReportManager::countSections()));
+    assignmentCount->setText(QString::number(ReportManager::countAssignments()));
 }

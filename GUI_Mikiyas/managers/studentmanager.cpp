@@ -187,7 +187,8 @@ Student StudentManager::getStudentById(int id) const {
 
 QVector<Student> StudentManager::filter(const QString &nameOrId,
                                          const QString &gradeFilter,
-                                         const QString &statusFilter) const {
+                                         const QString &statusFilter,
+                                         int teacherId) const {
     QString sql = "SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
                   "FROM students s "
                   "LEFT JOIN grade_levels g ON s.grade_id = g.id "
@@ -195,8 +196,12 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
                   "LEFT JOIN streams st ON s.stream_id = st.id "
                   "WHERE 1=1";
     
-    QStringList conditions;
     QVariantList params;
+
+    if (teacherId > 0) {
+        sql += " AND s.section_id IN (SELECT section_id FROM teaching_assignments WHERE teacher_id = ?)";
+        params << teacherId;
+    }
 
     if (!nameOrId.isEmpty()) {
         sql += " AND (s.id LIKE ? OR s.fullName LIKE ?)";

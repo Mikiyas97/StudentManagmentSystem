@@ -35,7 +35,13 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     controls->addWidget(new QLabel("Stream:"));
     controls->addWidget(streamCombo);
 
-    // Section Filter (dynamic based on Grade)
+    yearCombo = new QComboBox;
+    auto years = sectionManager.getAllYears();
+    for (const auto& y : years) yearCombo->addItem(y.name, y.id);
+    controls->addWidget(new QLabel("Year:"));
+    controls->addWidget(yearCombo);
+
+    // Section Filter (dynamic based on Grade and Year)
     sectionCombo = new QComboBox;
     controls->addWidget(new QLabel("Section:"));
     controls->addWidget(sectionCombo);
@@ -44,7 +50,8 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     auto updateSections = [this]() {
         sectionCombo->clear();
         int gradeId = gradeCombo->currentData().toInt();
-        auto sections = sectionManager.getSectionsByGrade(gradeId);
+        int yearId = yearCombo->currentData().toInt();
+        auto sections = sectionManager.getSectionsByGradeAndYear(gradeId, yearId);
         for (const auto& s : sections) sectionCombo->addItem(s.name, s.id);
         
         QString gradeText = gradeCombo->currentText();
@@ -53,13 +60,8 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
         if (!needsStream) streamCombo->setCurrentIndex(0);
     };
     connect(gradeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
+    connect(yearCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), updateSections);
     updateSections(); // Initial load
-
-    yearCombo = new QComboBox;
-    auto years = sectionManager.getAllYears();
-    for (const auto& y : years) yearCombo->addItem(y.name, y.id);
-    controls->addWidget(new QLabel("Year:"));
-    controls->addWidget(yearCombo);
 
     semesterCombo = new QComboBox;
     semesterCombo->addItem("Semester 1", 1);
@@ -67,12 +69,12 @@ GradePage::GradePage(const QString &role, int id, QWidget *parent)
     controls->addWidget(new QLabel("Semester:"));
     controls->addWidget(semesterCombo);
 
-    QPushButton *calcBtn = new QPushButton("Generate Ranking");
+    QPushButton *calcBtn = new QPushButton("Rank");
     calcBtn->setStyleSheet("background-color: #3498db; color: white;");
     connect(calcBtn, &QPushButton::clicked, this, &GradePage::onCalculate);
     controls->addWidget(calcBtn);
 
-    QPushButton *approveBtn = new QPushButton("Approve Results");
+    QPushButton *approveBtn = new QPushButton("Approve");
     approveBtn->setStyleSheet("background-color: #2ecc71; color: white; font-weight: bold;");
     connect(approveBtn, &QPushButton::clicked, this, &GradePage::onApprove);
     controls->addWidget(approveBtn);
@@ -98,11 +100,20 @@ void GradePage::refreshTable() {
 void GradePage::onCalculate() {
     table->setRowCount(0);
     int sectionId = sectionCombo->currentData().toInt();
+    if (sectionId <= 0) {
+        QMessageBox::warning(this, "Input Required", "Please select a section first.");
+        return;
+    }
     int yearId = yearCombo->currentData().toInt();
     int semester = semesterCombo->currentData().toInt();
 
     QVector<RankInfo> rankings = manager.calculateSectionRanking(sectionId, yearId, semester);
     
+    if (rankings.isEmpty()) {
+        QMessageBox::information(this, "No Results", "No marks found for this section in the selected year and semester.");
+        return;
+    }
+
     for (const auto &info : rankings) {
         int r = table->rowCount();
         table->insertRow(r);

@@ -25,11 +25,14 @@ public:
     // Lookup helpers (shared across many pages for combo boxes)
     static QVector<GradeLevel> getAllGrades();
     static QVector<AcademicYear> getAllYears();
+    static bool addYear(const QString &yearName);
     static QVector<Stream> getAllStreams();
     
     // Section CRUD
     bool addSection(int gradeId, const QString &name, int yearId);
+    int getSectionYear(int sectionId) const;
     QVector<Section> getSectionsByGrade(int gradeId) const;
+    QVector<Section> getSectionsByGradeAndYear(int gradeId, int yearId) const;
     QVector<Section> getAllSections() const;
     bool deleteSection(int id);
 };

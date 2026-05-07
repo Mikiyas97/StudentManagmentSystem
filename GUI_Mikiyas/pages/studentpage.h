@@ -40,6 +40,7 @@ private:
     QWidget *bulkBar;
     QLabel *selectionLabel;
     QString userRole;
+    int userId;
     QString teacherCourse;
 
     void editStudentById(int id);

@@ -39,9 +39,10 @@ public:
     Student getStudentById(int id) const;
 
     // Advanced search & filter (combined)
-    QVector<Student> filter(const QString &nameOrId,
-                            const QString &classFilter,
-                            const QString &statusFilter) const;
+    QVector<Student> filter(const QString &nameOrId = "",
+                           const QString &gradeFilter = "All",
+                           const QString &statusFilter = "All",
+                           int teacherId = -1) const;
 
     // Sorting
     enum SortField { ById, ByName, ByClass };

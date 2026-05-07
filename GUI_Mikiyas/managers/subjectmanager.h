@@ -27,6 +27,7 @@ public:
     QVector<Subject> getAllSubjects() const;
     QVector<SubjectDetail> getSubjectsWithDetails() const;
     QVector<Subject> getSubjectsForSection(int sectionId) const;
+    QString getSubjectName(int id) const;
     bool deleteSubject(int id);
     bool assignTeacherToSubject(int teacherId, int subjectId, int sectionId, int yearId);
 };

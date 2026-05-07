@@ -43,11 +43,11 @@ QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId
     QVector<RankInfo> ranking;
     QSqlQuery query;
     // Join with students to get names
-    query.prepare("SELECT student_id, s.fullName, SUM(score) as total, COUNT(subject_id) as sub_count "
+    query.prepare("SELECT m.student_id, s.fullName, SUM(m.score) as total, COUNT(m.subject_id) as sub_count "
                   "FROM marks m "
                   "JOIN students s ON m.student_id = s.id "
                   "WHERE m.section_id = ? AND m.year_id = ? AND m.semester = ? "
-                  "GROUP BY student_id "
+                  "GROUP BY m.student_id "
                   "ORDER BY total DESC");
     query.addBindValue(sectionId);
     query.addBindValue(yearId);
@@ -57,10 +57,10 @@ QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId
         int r = 1;
         while (query.next()) {
             RankInfo info;
-            info.studentId = query.value("student_id").toInt();
-            info.studentName = query.value("fullName").toString();
-            info.totalScore = query.value("total").toDouble();
-            int counts = query.value("sub_count").toInt();
+            info.studentId = query.value(0).toInt();
+            info.studentName = query.value(1).toString();
+            info.totalScore = query.value(2).toDouble();
+            int counts = query.value(3).toInt();
             info.average = (counts > 0) ? (info.totalScore / counts) : 0;
             info.rank = r++;
             ranking.push_back(info);

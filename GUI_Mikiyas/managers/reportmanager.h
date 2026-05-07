@@ -8,6 +8,9 @@ public:
     static int countStudents();
     static int countGrades();
     static int countCourses();
+    static int countTeachers();
+    static int countSections();
+    static int countAssignments();
 };
 
 #endif // REPORTMANAGER_H

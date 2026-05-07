@@ -9,13 +9,17 @@ class ReportPage : public QWidget {
 public:
     explicit ReportPage(QWidget *parent = nullptr);
 
-private slots:
+public slots: // Made public for MainWindow to call refreshTable
     void onRefresh();
+    void refreshTable() { onRefresh(); }
 
 private:
     QLabel *studentCount;
     QLabel *gradeCount;
     QLabel *courseCount;
+    QLabel *teacherCount;
+    QLabel *sectionCount;
+    QLabel *assignmentCount;
 };
 
 #endif // REPORTPAGE_H

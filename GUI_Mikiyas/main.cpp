@@ -64,6 +64,15 @@ bool setupDatabase() {
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
     query.exec("ALTER TABLE ranking_approvals ADD COLUMN semester INTEGER DEFAULT 1");
 
+    // --- Data Integrity Migration ---
+    // Fix: Ensure marks are associated with the correct year of their section 
+    // (Fixes issue where marks were saved to 'latest year' instead of section's year)
+    query.exec("UPDATE marks SET year_id = (SELECT year_id FROM sections WHERE sections.id = marks.section_id) "
+               "WHERE year_id != (SELECT year_id FROM sections WHERE sections.id = marks.section_id)");
+    
+    query.exec("UPDATE teaching_assignments SET year_id = (SELECT year_id FROM sections WHERE sections.id = teaching_assignments.section_id) "
+               "WHERE year_id != (SELECT year_id FROM sections WHERE sections.id = teaching_assignments.section_id)");
+
     // --- Seeding Initial Data ---
     
     // Seed Academic Year (Ethiopian Calendar standard)

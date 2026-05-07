@@ -64,13 +64,13 @@ void MainWindow::setupUI() {
 
     // Nav buttons based on role
     if (userRole == "admin") {
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 0));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 1));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Subjects"), 2));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\xAB  Sections"), 3));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Marks"), 4));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\x86  Ranking"), 5));
-        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Reports"), 6));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x8A  Dashboard"), 0));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  Students"), 1));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  Teachers"), 2));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9A  Subjects"), 3));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\xAB  Sections"), 4));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x93\x9D  Marks"), 5));
+        sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8F\x86  Ranking"), 6));
     } else if (userRole == "teacher") {
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x91\xA4  My Profile"), 0));
         sideLayout->addWidget(makeNavButton(QString::fromUtf8("  \xF0\x9F\x8E\x93  My Students"), 1));
@@ -164,13 +164,13 @@ void MainWindow::setupUI() {
     stack->setObjectName("contentArea");
 
     if (userRole == "admin") {
-        stack->addWidget(new StudentPage("admin"));// 0
-        stack->addWidget(new TeacherPage);         // 1
-        stack->addWidget(new CoursePage);          // 2 (SubjectPage)
-        stack->addWidget(new OfferingPage);        // 3 (SectionPage)
-        stack->addWidget(new EnrollmentPage("admin")); // 4 (MarkEntry)
-        stack->addWidget(new GradePage("admin"));      // 5 (Ranking)
-        stack->addWidget(new ReportPage);          // 6
+        stack->addWidget(new ReportPage);              // 0
+        stack->addWidget(new StudentPage("admin"));    // 1
+        stack->addWidget(new TeacherPage);             // 2
+        stack->addWidget(new CoursePage);              // 3
+        stack->addWidget(new OfferingPage);            // 4
+        stack->addWidget(new EnrollmentPage("admin")); // 5
+        stack->addWidget(new GradePage("admin"));      // 6
     } else if (userRole == "teacher") {
         stack->addWidget(new ProfilePage("teacher", userStudentId)); // 0
         stack->addWidget(new StudentPage("teacher", userStudentId)); // 1

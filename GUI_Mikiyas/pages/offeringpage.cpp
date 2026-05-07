@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QTableWidget>
+#include <QInputDialog>
 
 OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -41,6 +42,11 @@ OfferingPage::OfferingPage(QWidget *parent) : QWidget(parent) {
     for (const auto& y : years) yearCombo->addItem(y.name, y.id);
     inputLayout->addWidget(new QLabel("Year:"));
     inputLayout->addWidget(yearCombo);
+
+    QPushButton *addYearBtn = new QPushButton("+");
+    addYearBtn->setFixedWidth(30);
+    connect(addYearBtn, &QPushButton::clicked, this, &OfferingPage::onAddYear);
+    inputLayout->addWidget(addYearBtn);
 
     QPushButton *addBtn = new QPushButton("Create Section");
     connect(addBtn, &QPushButton::clicked, this, &OfferingPage::onAdd);
@@ -86,6 +92,20 @@ void OfferingPage::onAdd() {
         refreshTable();
     } else {
         QMessageBox::warning(this, "Error", "Failed to create section.");
+    }
+}
+
+void OfferingPage::onAddYear() {
+    bool ok;
+    QString yearName = QInputDialog::getText(this, "Add Academic Year", "Enter Year (e.g. 2018):", QLineEdit::Normal, "", &ok);
+    if (ok && !yearName.trimmed().isEmpty()) {
+        if (SectionManager::addYear(yearName.trimmed())) {
+            yearCombo->clear();
+            auto years = manager.getAllYears();
+            for (const auto& y : years) yearCombo->addItem(y.name, y.id);
+        } else {
+            QMessageBox::warning(this, "Error", "Failed to add year. It might already exist.");
+        }
     }
 }
 

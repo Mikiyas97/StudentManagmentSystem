@@ -56,6 +56,16 @@ QVector<Subject> SubjectManager::getSubjectsForSection(int sectionId) const {
     return list;
 }
 
+QString SubjectManager::getSubjectName(int id) const {
+    QSqlQuery query;
+    query.prepare("SELECT name FROM subjects WHERE id = ?");
+    query.addBindValue(id);
+    if (query.exec() && query.next()) {
+        return query.value(0).toString();
+    }
+    return "Unknown Subject";
+}
+
 bool SubjectManager::addSubject(const QString &name, int gradeId, int streamId) {
     QSqlQuery query;
     query.prepare("INSERT INTO subjects (name, grade_id, stream_id) VALUES (?, ?, ?)");

@@ -21,3 +21,15 @@ int ReportManager::countGrades() {
 int ReportManager::countCourses() {
     return countTableRows("subjects");
 }
+
+int ReportManager::countTeachers() {
+    return countTableRows("teachers");
+}
+
+int ReportManager::countSections() {
+    return countTableRows("sections");
+}
+
+int ReportManager::countAssignments() {
+    return countTableRows("teaching_assignments");
+}

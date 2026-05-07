@@ -3,6 +3,7 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QPushButton>
+#include "../managers/subjectmanager.h"
 
 TeacherDetailDialog::TeacherDetailDialog(const Teacher &t, QWidget *parent) : QDialog(parent) {
     setWindowTitle("Teacher Information");
@@ -20,6 +21,9 @@ TeacherDetailDialog::TeacherDetailDialog(const Teacher &t, QWidget *parent) : QD
     form->addRow("Date of Birth:", new QLabel(t.dateOfBirth.isEmpty() ? "Not Set" : t.dateOfBirth));
     form->addRow("Phone:", new QLabel(t.phone));
     form->addRow("Email:", new QLabel(t.email));
+    
+    SubjectManager sm;
+    form->addRow("Specialization:", new QLabel(sm.getSubjectName(t.subject_id)));
     
     layout->addLayout(form);
 

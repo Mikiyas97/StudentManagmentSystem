@@ -137,7 +137,7 @@ void EnrollmentPage::refreshTable() {
         }
         // --- Rank Calculation Logic ---
         int sectionId = manager.getStudentSectionId(userStudentId);
-        int yearId = manager.getLatestYearId();
+        int yearId = sectionManager.getSectionYear(sectionId);
 
         // Let's assume we want the rank for the latest semester (Semester 1 for now)
         int currentSemester = 1;
@@ -187,7 +187,7 @@ void EnrollmentPage::onSaveAll() {
     int sectionId = sectionFilter->currentData().toInt();
     int subjectId = subjectFilter->currentData().toInt();
     int semester = semesterFilter->currentData().toInt();
-    int yearId = manager.getLatestYearId();
+    int yearId = sectionManager.getSectionYear(sectionId);
 
     for (int i = 0; i < table->rowCount(); ++i) {
         int sid = table->item(i, 0)->text().toInt();

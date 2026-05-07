@@ -12,7 +12,8 @@
 #include <QInputDialog>
 #include <QCheckBox>
 
-StudentPage::StudentPage(const QString &role, int id, QWidget *parent) : QWidget(parent), userRole(role)
+StudentPage::StudentPage(const QString &role, int id, QWidget *parent) 
+    : QWidget(parent), userRole(role), userId(id)
 {
     if (userRole == "teacher") {
         // Teacher specific filtering will be implemented via assignments
@@ -197,16 +198,12 @@ void StudentPage::refreshTable() {
     classFilterCombo->blockSignals(false);
 
     // Get filtered data
-    QVector<Student> students;
-    if (userRole == "teacher") {
-        // Teacher logic will be updated later with TeachingAssignment
-        students = manager.getStudents(); 
-    } else {
-        students = manager.filter(searchEdit->text().trimmed(),
-                                  classFilterCombo->currentText(),
-                                  statusFilterCombo->currentText()
-        );
-    }
+    QVector<Student> students = manager.filter(
+        searchEdit->text().trimmed(),
+        classFilterCombo->currentText(),
+        statusFilterCombo->currentText(),
+        (userRole == "teacher" ? userId : -1)
+    );
 
     table->setRowCount(students.size());
     for (int i = 0; i < students.size(); ++i) {

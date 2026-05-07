@@ -16,6 +16,7 @@ public:
 
 private slots:
     void onAdd();
+    void onAddYear();
     void onOpenAssignments();
     void refreshTable();
 
