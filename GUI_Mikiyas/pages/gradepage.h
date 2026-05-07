@@ -14,10 +14,12 @@ public:
     explicit GradePage(const QString &role = "admin", int id = -1,
                        QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onCalculate();
     void onApprove();
-    void refreshTable();
 
 private:
     MarkManager manager;

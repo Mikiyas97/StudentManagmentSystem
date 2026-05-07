@@ -40,18 +40,18 @@ template <> constexpr inline auto CoursePage::qt_create_metaobjectdata<qt_meta_t
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "CoursePage",
-        "onAdd",
+        "refreshTable",
         "",
-        "onDelete",
-        "refreshTable"
+        "onAdd",
+        "onDelete"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onAdd'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onDelete'
-        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onAdd'
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onDelete'
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
@@ -76,9 +76,9 @@ void CoursePage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     auto *_t = static_cast<CoursePage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onAdd(); break;
-        case 1: _t->onDelete(); break;
-        case 2: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onAdd(); break;
+        case 2: _t->onDelete(); break;
         default: ;
         }
     }

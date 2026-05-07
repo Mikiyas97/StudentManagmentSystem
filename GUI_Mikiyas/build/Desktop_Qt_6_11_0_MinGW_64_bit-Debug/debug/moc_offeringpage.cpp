@@ -40,21 +40,21 @@ template <> constexpr inline auto OfferingPage::qt_create_metaobjectdata<qt_meta
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "OfferingPage",
-        "onAdd",
+        "refreshTable",
         "",
+        "onAdd",
         "onAddYear",
-        "onOpenAssignments",
-        "refreshTable"
+        "onOpenAssignments"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onAdd'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onAddYear'
-        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onOpenAssignments'
-        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onAdd'
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onAddYear'
+        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onOpenAssignments'
         QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
@@ -79,10 +79,10 @@ void OfferingPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     auto *_t = static_cast<OfferingPage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onAdd(); break;
-        case 1: _t->onAddYear(); break;
-        case 2: _t->onOpenAssignments(); break;
-        case 3: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onAdd(); break;
+        case 2: _t->onAddYear(); break;
+        case 3: _t->onOpenAssignments(); break;
         default: ;
         }
     }

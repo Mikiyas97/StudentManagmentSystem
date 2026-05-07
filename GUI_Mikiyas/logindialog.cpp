@@ -110,7 +110,7 @@ void LoginDialog::onLogin() {
     UserManager um;
     User u = um.getUserByUsername(username);
 
-    if (u.username.isEmpty() || u.password != password) {
+    if (u.username.isEmpty() || u.password != UserManager::hashPassword(password)) {
         errorLabel->setText("Invalid credentials!");
         return;
     }

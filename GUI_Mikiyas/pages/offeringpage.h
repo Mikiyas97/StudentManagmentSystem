@@ -14,11 +14,13 @@ class OfferingPage : public QWidget {
 public:
     explicit OfferingPage(QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onAdd();
     void onAddYear();
     void onOpenAssignments();
-    void refreshTable();
 
 private:
     SectionManager manager;

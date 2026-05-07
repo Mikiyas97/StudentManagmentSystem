@@ -14,23 +14,45 @@ ProfilePage::ProfilePage(const QString &role, int id, QWidget *parent)
     mainLayout->setContentsMargins(30, 20, 30, 20);
     mainLayout->setSpacing(15);
 
-    // 2. Logic to load data and build UI
+    setupUI();
+}
+
+void ProfilePage::setupUI() {
+    clearLayout(mainLayout);
+
+    // Logic to load data and build UI
     if (userRole.toLower() == "admin") {
         createHeader("System Administrator", "ID: 0");
         setupAdminProfile();
     } else if (userRole.toLower() == "teacher") {
         UserManager um;
-        Teacher t = um.getTeacherById(id);
+        Teacher t = um.getTeacherById(userId);
         createHeader(t.fullName, "ID: " + QString::number(t.id));
-        setupTeacherProfile(id);
+        setupTeacherProfile(userId);
     } else {
         StudentManager sm;
-        Student s = sm.getStudentById(id);
+        Student s = sm.getStudentById(userId);
         createHeader(s.fullName, "ID: " + QString::number(s.id));
-        setupStudentProfile(id);
+        setupStudentProfile(userId);
     }
 
     mainLayout->addStretch();
+}
+
+void ProfilePage::refreshTable() {
+    setupUI();
+}
+
+void ProfilePage::clearLayout(QLayout *layout) {
+    if (!layout) return;
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        if (QWidget *widget = item->widget()) {
+            widget->deleteLater();
+        } else if (QLayout *childLayout = item->layout()) {
+            clearLayout(childLayout);
+        }
+        delete item;
+    }
 }
 
 void ProfilePage::createHeader(const QString &name, const QString &idText) {

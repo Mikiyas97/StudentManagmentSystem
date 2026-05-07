@@ -7,7 +7,7 @@ SectionManager::SectionManager() {}
 
 QVector<GradeLevel> SectionManager::getAllGrades() {
     QVector<GradeLevel> list;
-    QSqlQuery query("SELECT id, name FROM grade_levels ORDER BY CAST(name AS INTEGER) ASC");
+    QSqlQuery query("SELECT id, name FROM grade_levels ORDER BY name + 0 ASC");
     while (query.next()) {
         list.push_back({query.value("id").toInt(), query.value("name").toString()});
     }

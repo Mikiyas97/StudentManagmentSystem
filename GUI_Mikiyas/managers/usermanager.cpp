@@ -5,11 +5,18 @@
 
 UserManager::UserManager() {}
 
+QString UserManager::hashPassword(const QString &password) {
+    QByteArray hash = QCryptographicHash::hash(
+        password.toUtf8(), QCryptographicHash::Sha256
+    );
+    return QString(hash.toHex());
+}
+
 bool UserManager::addUser(const User &u) {
     QSqlQuery q;
-    q.prepare("INSERT OR REPLACE INTO users (username, password, role, relatedId) VALUES (?, ?, ?, ?)");
+    q.prepare("REPLACE INTO users (username, password, role, relatedId) VALUES (?, ?, ?, ?)");
     q.addBindValue(u.username);
-    q.addBindValue(u.password);
+    q.addBindValue(hashPassword(u.password));
     q.addBindValue(u.role);
     q.addBindValue(u.relatedId);
     return q.exec();
@@ -18,7 +25,7 @@ bool UserManager::addUser(const User &u) {
 bool UserManager::changePassword(const QString &username, const QString &newPassword) {
     QSqlQuery q;
     q.prepare("UPDATE users SET password = ? WHERE username = ?");
-    q.addBindValue(newPassword);
+    q.addBindValue(hashPassword(newPassword));
     q.addBindValue(username);
     return q.exec();
 }
@@ -165,7 +172,7 @@ QVector<GradeLevel> UserManager::getTeacherGrades(int teacherId) const {
     q.prepare("SELECT DISTINCT g.id, g.name FROM grade_levels g "
               "JOIN sections s ON g.id = s.grade_id "
               "JOIN teaching_assignments ta ON s.id = ta.section_id "
-              "WHERE ta.teacher_id = ? ORDER BY CAST(g.name AS INTEGER) ASC");
+              "WHERE ta.teacher_id = ? ORDER BY g.name + 0 ASC");
     q.addBindValue(teacherId);
     if (q.exec()) {
         while (q.next()) {

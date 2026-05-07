@@ -13,10 +13,12 @@ class CoursePage : public QWidget {
 public:
     explicit CoursePage(QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onAdd();
     void onDelete();
-    void refreshTable();
 
 private:
     SubjectManager manager;

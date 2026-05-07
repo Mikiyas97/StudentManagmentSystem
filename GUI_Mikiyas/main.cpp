@@ -5,107 +5,12 @@
 #include <QMessageBox>
 #include "logindialog.h"
 #include "mainwindow.h"
-
-bool setupDatabase() {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("school.db");
-    
-    if (!db.open()) {
-        QMessageBox::critical(nullptr, "Database Error", "Failed to open database!");
-        return false;
-    }
-    
-    QSqlQuery query;
-    
-    // 1. Core Structure Tables
-    query.exec("CREATE TABLE IF NOT EXISTS academic_years (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
-    query.exec("CREATE TABLE IF NOT EXISTS grade_levels (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
-    query.exec("CREATE TABLE IF NOT EXISTS streams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)");
-    query.exec("CREATE TABLE IF NOT EXISTS sections (id INTEGER PRIMARY KEY AUTOINCREMENT, grade_id INTEGER, name TEXT, year_id INTEGER, "
-               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
-
-    // 2. People Tables
-    query.exec("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, fullName TEXT, gender TEXT, date_of_birth TEXT, grade_id INTEGER, section_id INTEGER, stream_id INTEGER, "
-               "phone TEXT, email TEXT, status TEXT, "
-               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(stream_id) REFERENCES streams(id))");
-    // Migration: ensure new columns exist
-    query.exec("ALTER TABLE students ADD COLUMN gender TEXT");
-    query.exec("ALTER TABLE students ADD COLUMN date_of_birth TEXT");
-               
-    query.exec("CREATE TABLE IF NOT EXISTS teachers (id INTEGER PRIMARY KEY, fullName TEXT, gender TEXT, date_of_birth TEXT, phone TEXT, email TEXT, subject_id INTEGER, "
-               "FOREIGN KEY(subject_id) REFERENCES subjects(id))");
-    query.exec("ALTER TABLE teachers ADD COLUMN gender TEXT");
-    query.exec("ALTER TABLE teachers ADD COLUMN date_of_birth TEXT");
-    // Migration: ensure subject_id exists if table was already there
-    query.exec("ALTER TABLE teachers ADD COLUMN subject_id INTEGER");
-
-    // 3. User Accounts
-    query.exec("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT, role TEXT, relatedId INTEGER)");
-
-    // 4. Academic Data Tables
-    query.exec("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, grade_id INTEGER, stream_id INTEGER, "
-               "FOREIGN KEY(grade_id) REFERENCES grade_levels(id), FOREIGN KEY(stream_id) REFERENCES streams(id))");
-
-    query.exec("CREATE TABLE IF NOT EXISTS teaching_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, "
-               "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
-               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id), "
-               "UNIQUE(section_id, subject_id, year_id))");
-
-    query.exec("CREATE TABLE IF NOT EXISTS homeroom_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, teacher_id INTEGER, section_id INTEGER, year_id INTEGER, "
-               "FOREIGN KEY(teacher_id) REFERENCES teachers(id), FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
-
-    query.exec("CREATE TABLE IF NOT EXISTS marks (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, subject_id INTEGER, section_id INTEGER, year_id INTEGER, semester INTEGER DEFAULT 1, score REAL, "
-               "FOREIGN KEY(student_id) REFERENCES students(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
-               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
-    query.exec("ALTER TABLE marks ADD COLUMN semester INTEGER DEFAULT 1");
-
-    query.exec("CREATE TABLE IF NOT EXISTS ranking_approvals (section_id INTEGER, year_id INTEGER, semester INTEGER DEFAULT 1, is_approved INTEGER DEFAULT 0, "
-               "PRIMARY KEY(section_id, year_id, semester), "
-               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
-    query.exec("ALTER TABLE ranking_approvals ADD COLUMN semester INTEGER DEFAULT 1");
-
-    // --- Data Integrity Migration ---
-    // Fix: Ensure marks are associated with the correct year of their section 
-    // (Fixes issue where marks were saved to 'latest year' instead of section's year)
-    query.exec("UPDATE marks SET year_id = (SELECT year_id FROM sections WHERE sections.id = marks.section_id) "
-               "WHERE year_id != (SELECT year_id FROM sections WHERE sections.id = marks.section_id)");
-    
-    query.exec("UPDATE teaching_assignments SET year_id = (SELECT year_id FROM sections WHERE sections.id = teaching_assignments.section_id) "
-               "WHERE year_id != (SELECT year_id FROM sections WHERE sections.id = teaching_assignments.section_id)");
-
-    // --- Seeding Initial Data ---
-    
-    // Seed Academic Year (Ethiopian Calendar standard)
-    query.exec("DELETE FROM academic_years WHERE name LIKE '%/%'"); // Remove old formats like '2015/26'
-    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2018')");
-    query.exec("INSERT OR IGNORE INTO academic_years (name) VALUES ('2019')");
-    
-    // Seed Grade Levels
-    QStringList grades = {"9", "10", "11", "12"};
-    for (const QString &g : grades) {
-        query.prepare("INSERT OR IGNORE INTO grade_levels (name) VALUES (?)");
-        query.addBindValue(g);
-        query.exec();
-    }
-
-    // Seed Streams
-    query.exec("INSERT OR IGNORE INTO streams (name) VALUES ('Natural Science')");
-    query.exec("INSERT OR IGNORE INTO streams (name) VALUES ('Social Science')");
-
-    // Seed default admin
-    QSqlQuery checkAdmin("SELECT * FROM users WHERE username = 'admin'");
-    if (!checkAdmin.next()) {
-        query.exec("INSERT INTO users (username, password, role, relatedId) "
-                   "VALUES ('admin', 'admin123', 'admin', -1)");
-    }
-               
-    return true;
-}
+#include "managers/databasemanager.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     
-    if (!setupDatabase()) {
+    if (!DatabaseManager::initDatabase()) {
         return 1;
     }
 

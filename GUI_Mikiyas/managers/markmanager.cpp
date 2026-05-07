@@ -83,7 +83,7 @@ bool MarkManager::isRankingApproved(int sectionId, int yearId, int semester) con
 
 bool MarkManager::approveRanking(int sectionId, int yearId, int semester) {
     QSqlQuery query;
-    query.prepare("INSERT OR REPLACE INTO ranking_approvals (section_id, year_id, semester, is_approved) VALUES (?, ?, ?, 1)");
+    query.prepare("REPLACE INTO ranking_approvals (section_id, year_id, semester, is_approved) VALUES (?, ?, ?, 1)");
     query.addBindValue(sectionId);
     query.addBindValue(yearId);
     query.addBindValue(semester);

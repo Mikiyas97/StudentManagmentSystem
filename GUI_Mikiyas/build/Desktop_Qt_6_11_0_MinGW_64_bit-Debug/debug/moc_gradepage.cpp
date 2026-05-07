@@ -40,18 +40,18 @@ template <> constexpr inline auto GradePage::qt_create_metaobjectdata<qt_meta_ta
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "GradePage",
-        "onCalculate",
+        "refreshTable",
         "",
-        "onApprove",
-        "refreshTable"
+        "onCalculate",
+        "onApprove"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onCalculate'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onApprove'
-        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onCalculate'
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onApprove'
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
@@ -76,9 +76,9 @@ void GradePage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
     auto *_t = static_cast<GradePage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onCalculate(); break;
-        case 1: _t->onApprove(); break;
-        case 2: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onCalculate(); break;
+        case 2: _t->onApprove(); break;
         default: ;
         }
     }

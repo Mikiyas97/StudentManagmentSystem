@@ -40,18 +40,18 @@ template <> constexpr inline auto EnrollmentPage::qt_create_metaobjectdata<qt_me
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "EnrollmentPage",
-        "onSaveAll",
+        "refreshTable",
         "",
-        "onFilter",
-        "refreshTable"
+        "onSaveAll",
+        "onFilter"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'onSaveAll'
-        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onFilter'
-        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'refreshTable'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onSaveAll'
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onFilter'
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
@@ -76,9 +76,9 @@ void EnrollmentPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
     auto *_t = static_cast<EnrollmentPage *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->onSaveAll(); break;
-        case 1: _t->onFilter(); break;
-        case 2: _t->refreshTable(); break;
+        case 0: _t->refreshTable(); break;
+        case 1: _t->onSaveAll(); break;
+        case 2: _t->onFilter(); break;
         default: ;
         }
     }

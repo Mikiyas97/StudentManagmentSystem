@@ -12,6 +12,7 @@ SOURCES += main.cpp \
            managers/sectionmanager.cpp \
            managers/subjectmanager.cpp \
            managers/markmanager.cpp \
+           managers/databasemanager.cpp \
            pages/studentpage.cpp \
            pages/studentformdialog.cpp \
            pages/studentdetaildialog.cpp \
@@ -34,6 +35,7 @@ HEADERS += mainwindow.h \
            managers/sectionmanager.h \
            managers/subjectmanager.h \
            managers/markmanager.h \
+           managers/databasemanager.h \
            pages/studentpage.h \
            pages/studentformdialog.h \
            pages/studentdetaildialog.h \

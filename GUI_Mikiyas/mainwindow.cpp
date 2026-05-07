@@ -218,9 +218,12 @@ void MainWindow::switchPage(int index) {
 }
 
 void MainWindow::onGlobalRefresh() {
-    QWidget *currentPage = stack->currentWidget();
-    if (currentPage) {
-        // Dynamically invoke refreshTable() if it exists on the page
-        QMetaObject::invokeMethod(currentPage, "refreshTable");
+    // Refresh ALL pages in the stack, not just the active one
+    // This ensures all data is up-to-date across the entire app
+    for (int i = 0; i < stack->count(); ++i) {
+        QWidget *page = stack->widget(i);
+        if (page) {
+            QMetaObject::invokeMethod(page, "refreshTable");
+        }
     }
 }

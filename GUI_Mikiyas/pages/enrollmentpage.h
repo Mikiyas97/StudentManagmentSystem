@@ -15,10 +15,12 @@ class EnrollmentPage : public QWidget {
 public:
     explicit EnrollmentPage(const QString &role = "admin", int studentId = -1, QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private slots:
     void onSaveAll();
     void onFilter();
-    void refreshTable();
 
 private:
     MarkManager manager;

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QVector>
+#include <QCryptographicHash>
 #include "sectionmanager.h"
 #include "subjectmanager.h"
 
@@ -26,6 +27,9 @@ struct User {
 class UserManager {
 public:
     UserManager();
+    
+    // Password Hashing
+    static QString hashPassword(const QString &password);
     
     // Users
     bool addUser(const User &u);
