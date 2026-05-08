@@ -58,11 +58,19 @@ bool setupDatabase() {
                "FOREIGN KEY(student_id) REFERENCES students(id), FOREIGN KEY(subject_id) REFERENCES subjects(id), "
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
     query.exec("ALTER TABLE marks ADD COLUMN semester INTEGER DEFAULT 1");
+    query.exec("ALTER TABLE marks ADD COLUMN mid_score REAL DEFAULT 0");
+    query.exec("ALTER TABLE marks ADD COLUMN assignment_score REAL DEFAULT 0");
+    query.exec("ALTER TABLE marks ADD COLUMN final_score REAL DEFAULT 0");
+    query.exec("ALTER TABLE marks ADD COLUMN total_score REAL DEFAULT 0");
 
     query.exec("CREATE TABLE IF NOT EXISTS ranking_approvals (section_id INTEGER, year_id INTEGER, semester INTEGER DEFAULT 1, is_approved INTEGER DEFAULT 0, "
                "PRIMARY KEY(section_id, year_id, semester), "
                "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(year_id) REFERENCES academic_years(id))");
     query.exec("ALTER TABLE ranking_approvals ADD COLUMN semester INTEGER DEFAULT 1");
+
+    query.exec("CREATE TABLE IF NOT EXISTS mark_approvals (section_id INTEGER, subject_id INTEGER, semester INTEGER DEFAULT 1, is_approved INTEGER DEFAULT 0, "
+               "PRIMARY KEY(section_id, subject_id, semester), "
+               "FOREIGN KEY(section_id) REFERENCES sections(id), FOREIGN KEY(subject_id) REFERENCES subjects(id))");
 
     // --- Data Integrity Migration ---
     // Fix: Ensure marks are associated with the correct year of their section 

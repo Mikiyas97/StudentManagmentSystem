@@ -94,6 +94,11 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
         connect(saveBtn, &QPushButton::clicked, this, &EnrollmentPage::onSaveAll);
         filterBar->addWidget(saveBtn);
         
+        QPushButton *approveBtn = new QPushButton("Approve Marks");
+        approveBtn->setStyleSheet("background-color: #3498db; color: white; font-weight: bold;");
+        connect(approveBtn, &QPushButton::clicked, this, &EnrollmentPage::onApproveMarks);
+        filterBar->addWidget(approveBtn);
+        
         filterBar->addStretch();
         layout->addLayout(filterBar);
     }
@@ -101,11 +106,11 @@ EnrollmentPage::EnrollmentPage(const QString &role, int id, QWidget *parent)
     // --- Table ---
     table = new QTableWidget;
     if (userRole == "student") {
-        table->setColumnCount(4);
-        table->setHorizontalHeaderLabels({"Semester", "Subject", "Score (100)", "Result"});
+        table->setColumnCount(7);
+        table->setHorizontalHeaderLabels({"Semester", "Subject", "Mid (30)", "Assign (20)", "Final (50)", "Total", "Result"});
     } else {
-        table->setColumnCount(3);
-        table->setHorizontalHeaderLabels({"Student ID", "Full Name", "Mark (0-100)"});
+        table->setColumnCount(5);
+        table->setHorizontalHeaderLabels({"Student ID", "Full Name", "Mid (30)", "Assign (20)", "Final (50)"});
     }
     table->horizontalHeader()->setStretchLastSection(true);
     table->setAlternatingRowColors(true);
@@ -130,9 +135,12 @@ void EnrollmentPage::refreshTable() {
             table->insertRow(r);
             table->setItem(r, 0, new QTableWidgetItem(QString::number(m.semester)));
             table->setItem(r, 1, new QTableWidgetItem(m.subjectName));
-            table->setItem(r, 2, new QTableWidgetItem(QString::number(m.score, 'f', 1)));
-            table->setItem(r, 3, new QTableWidgetItem(m.score >= 40 ? "Pass" : "Fail"));
-            total += m.score;
+            table->setItem(r, 2, new QTableWidgetItem(QString::number(m.midScore, 'f', 1)));
+            table->setItem(r, 3, new QTableWidgetItem(QString::number(m.assignmentScore, 'f', 1)));
+            table->setItem(r, 4, new QTableWidgetItem(QString::number(m.finalScore, 'f', 1)));
+            table->setItem(r, 5, new QTableWidgetItem(QString::number(m.totalScore, 'f', 1)));
+            table->setItem(r, 6, new QTableWidgetItem(m.totalScore >= 40 ? "Pass" : "Fail"));
+            total += m.totalScore;
             count++;
         }
         // --- Rank Calculation Logic ---
@@ -176,10 +184,20 @@ void EnrollmentPage::onFilter() {
         table->setItem(r, 0, new QTableWidgetItem(QString::number(student.studentId)));
         table->setItem(r, 1, new QTableWidgetItem(student.fullName));
         
-        QDoubleSpinBox *spin = new QDoubleSpinBox;
-        spin->setRange(0, 100);
-        spin->setValue(student.score);
-        table->setCellWidget(r, 2, spin);
+        QDoubleSpinBox *midSpin = new QDoubleSpinBox;
+        midSpin->setRange(0, 30);
+        midSpin->setValue(student.midScore);
+        table->setCellWidget(r, 2, midSpin);
+
+        QDoubleSpinBox *assignSpin = new QDoubleSpinBox;
+        assignSpin->setRange(0, 20);
+        assignSpin->setValue(student.assignmentScore);
+        table->setCellWidget(r, 3, assignSpin);
+
+        QDoubleSpinBox *finalSpin = new QDoubleSpinBox;
+        finalSpin->setRange(0, 50);
+        finalSpin->setValue(student.finalScore);
+        table->setCellWidget(r, 4, finalSpin);
     }
 }
 
@@ -191,10 +209,31 @@ void EnrollmentPage::onSaveAll() {
 
     for (int i = 0; i < table->rowCount(); ++i) {
         int sid = table->item(i, 0)->text().toInt();
-        QDoubleSpinBox *spin = qobject_cast<QDoubleSpinBox*>(table->cellWidget(i, 2));
-        if (spin) {
-            manager.setMark(sid, subjectId, sectionId, yearId, semester, spin->value());
+        QDoubleSpinBox *midSpin = qobject_cast<QDoubleSpinBox*>(table->cellWidget(i, 2));
+        QDoubleSpinBox *assignSpin = qobject_cast<QDoubleSpinBox*>(table->cellWidget(i, 3));
+        QDoubleSpinBox *finalSpin = qobject_cast<QDoubleSpinBox*>(table->cellWidget(i, 4));
+        
+        if (midSpin && assignSpin && finalSpin) {
+            manager.setMark(sid, subjectId, sectionId, yearId, semester, 
+                            midSpin->value(), assignSpin->value(), finalSpin->value());
         }
     }
     QMessageBox::information(this, "Success", "All student marks have been saved.");
+}
+
+void EnrollmentPage::onApproveMarks() {
+    int sectionId = sectionFilter->currentData().toInt();
+    int subjectId = subjectFilter->currentData().toInt();
+    int semester = semesterFilter->currentData().toInt();
+
+    if (sectionId <= 0 || subjectId <= 0) {
+        QMessageBox::warning(this, "Error", "Please select a valid section and subject first.");
+        return;
+    }
+
+    if (manager.approveSubjectMarks(sectionId, subjectId, semester)) {
+        QMessageBox::information(this, "Success", "Marks approved successfully! Students can now see their results.");
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to approve marks.");
+    }
 }

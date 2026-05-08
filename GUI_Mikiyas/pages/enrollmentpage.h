@@ -19,6 +19,7 @@ private slots:
     void onSaveAll();
     void onFilter();
     void refreshTable();
+    void onApproveMarks();
 
 private:
     MarkManager manager;

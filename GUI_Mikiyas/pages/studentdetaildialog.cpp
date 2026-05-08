@@ -79,8 +79,8 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     QVBoxLayout *marksLayout = new QVBoxLayout(marksGroup);
     
     QTableWidget *marksTable = new QTableWidget;
-    marksTable->setColumnCount(4);
-    marksTable->setHorizontalHeaderLabels({"Semester", "Subject", "Score", "Status"});
+    marksTable->setColumnCount(7);
+    marksTable->setHorizontalHeaderLabels({"Sem", "Subject", "Mid", "Asgn", "Finl", "Total", "Status"});
     marksTable->horizontalHeader()->setStretchLastSection(true);
     marksTable->setFixedHeight(200);
     marksTable->setStyleSheet("QTableWidget { background-color: #16213e; border-radius: 4px; gridline-color: #1f4068; }"
@@ -92,11 +92,14 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
         marksTable->insertRow(r);
         marksTable->setItem(r, 0, new QTableWidgetItem(QString::number(m.semester)));
         marksTable->setItem(r, 1, new QTableWidgetItem(m.subjectName));
-        marksTable->setItem(r, 2, new QTableWidgetItem(QString::number(m.score, 'f', 1)));
+        marksTable->setItem(r, 2, new QTableWidgetItem(QString::number(m.midScore, 'f', 0)));
+        marksTable->setItem(r, 3, new QTableWidgetItem(QString::number(m.assignmentScore, 'f', 0)));
+        marksTable->setItem(r, 4, new QTableWidgetItem(QString::number(m.finalScore, 'f', 0)));
+        marksTable->setItem(r, 5, new QTableWidgetItem(QString::number(m.totalScore, 'f', 1)));
         
-        QTableWidgetItem *statusItem = new QTableWidgetItem(m.score >= 40 ? "Pass" : "Fail");
-        statusItem->setForeground(m.score >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
-        marksTable->setItem(r, 3, statusItem);
+        QTableWidgetItem *statusItem = new QTableWidgetItem(m.totalScore >= 40 ? "Pass" : "Fail");
+        statusItem->setForeground(m.totalScore >= 40 ? QColor("#2ecc71") : QColor("#e74c3c"));
+        marksTable->setItem(r, 6, statusItem);
     }
     marksLayout->addWidget(marksTable);
     main->addWidget(marksGroup);

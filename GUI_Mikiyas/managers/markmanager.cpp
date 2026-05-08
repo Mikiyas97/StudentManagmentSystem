@@ -6,30 +6,40 @@
 
 MarkManager::MarkManager() {}
 
-bool MarkManager::setMark(int studentId, int subjectId, int sectionId, int yearId, int semester, double score) {
-    QSqlQuery del;
-    del.prepare("DELETE FROM marks WHERE student_id=? AND subject_id=? AND section_id=? AND year_id=? AND semester=?");
-    del.addBindValue(studentId);
-    del.addBindValue(subjectId);
-    del.addBindValue(sectionId);
-    del.addBindValue(yearId);
-    del.addBindValue(semester);
-    del.exec();
-
+bool MarkManager::setMark(int studentId, int subjectId, int sectionId, int yearId, int semester, 
+                         double mid, double assignment, double final) {
+    double total = mid + assignment + final;
+    
     QSqlQuery query;
-    query.prepare("INSERT INTO marks (student_id, subject_id, section_id, year_id, semester, score) VALUES (?, ?, ?, ?, ?, ?)");
+    query.prepare("INSERT OR REPLACE INTO marks (id, student_id, subject_id, section_id, year_id, semester, mid_score, assignment_score, final_score, total_score) "
+                  "VALUES ((SELECT id FROM marks WHERE student_id=? AND subject_id=? AND section_id=? AND year_id=? AND semester=?), "
+                  "?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                  
     query.addBindValue(studentId);
     query.addBindValue(subjectId);
     query.addBindValue(sectionId);
     query.addBindValue(yearId);
     query.addBindValue(semester);
-    query.addBindValue(score);
-    return query.exec();
+    
+    query.addBindValue(studentId);
+    query.addBindValue(subjectId);
+    query.addBindValue(sectionId);
+    query.addBindValue(yearId);
+    query.addBindValue(semester);
+    
+    query.addBindValue(mid);
+    query.addBindValue(assignment);
+    query.addBindValue(final);
+    query.addBindValue(total);
+    
+    bool ok = query.exec();
+    query.finish();
+    return ok;
 }
 
 double MarkManager::getStudentAverage(int studentId, int yearId, int semester) const {
     QSqlQuery query;
-    query.prepare("SELECT AVG(score) FROM marks WHERE student_id = ? AND year_id = ? AND semester = ?");
+    query.prepare("SELECT AVG(total_score) FROM marks WHERE student_id = ? AND year_id = ? AND semester = ?");
     query.addBindValue(studentId);
     query.addBindValue(yearId);
     query.addBindValue(semester);
@@ -42,11 +52,12 @@ double MarkManager::getStudentAverage(int studentId, int yearId, int semester) c
 QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId, int semester) const {
     QVector<RankInfo> ranking;
     QSqlQuery query;
-    // Join with students to get names
-    query.prepare("SELECT m.student_id, s.fullName, SUM(m.score) as total, COUNT(m.subject_id) as sub_count "
+    // Join with students to get names, and mark_approvals to only count approved marks
+    query.prepare("SELECT m.student_id, s.fullName, SUM(m.total_score) as total, COUNT(m.subject_id) as sub_count "
                   "FROM marks m "
                   "JOIN students s ON m.student_id = s.id "
-                  "WHERE m.section_id = ? AND m.year_id = ? AND m.semester = ? "
+                  "JOIN mark_approvals ma ON m.section_id = ma.section_id AND m.subject_id = ma.subject_id AND m.semester = ma.semester "
+                  "WHERE m.section_id = ? AND m.year_id = ? AND m.semester = ? AND ma.is_approved = 1 "
                   "GROUP BY m.student_id "
                   "ORDER BY total DESC");
     query.addBindValue(sectionId);
@@ -90,44 +101,104 @@ bool MarkManager::approveRanking(int sectionId, int yearId, int semester) {
     return query.exec();
 }
 
+bool MarkManager::approveSubjectMarks(int sectionId, int subjectId, int semester) {
+    QSqlQuery query;
+    query.prepare("INSERT OR REPLACE INTO mark_approvals (section_id, subject_id, semester, is_approved) VALUES (?, ?, ?, 1)");
+    query.addBindValue(sectionId);
+    query.addBindValue(subjectId);
+    query.addBindValue(semester);
+    return query.exec();
+}
+
+bool MarkManager::isSubjectMarksApproved(int sectionId, int subjectId, int semester) const {
+    QSqlQuery query;
+    query.prepare("SELECT is_approved FROM mark_approvals WHERE section_id = ? AND subject_id = ? AND semester = ?");
+    query.addBindValue(sectionId);
+    query.addBindValue(subjectId);
+    query.addBindValue(semester);
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt() == 1;
+    }
+    return false;
+}
+
 QVector<StudentMark> MarkManager::getStudentMarks(int studentId) const {
     QVector<StudentMark> list;
     QSqlQuery query;
-    query.prepare("SELECT m.semester, sub.name, m.score FROM marks m "
+    query.setForwardOnly(true);
+    query.prepare("SELECT m.semester, sub.name, m.mid_score, m.assignment_score, m.final_score, m.total_score FROM marks m "
                   "JOIN subjects sub ON m.subject_id = sub.id "
-                  "WHERE m.student_id = ? ORDER BY m.semester ASC, sub.name ASC");
+                  "JOIN mark_approvals ma ON m.section_id = ma.section_id AND m.subject_id = ma.subject_id AND m.semester = ma.semester "
+                  "WHERE m.student_id = ? AND ma.is_approved = 1 ORDER BY m.semester ASC, sub.name ASC");
     query.addBindValue(studentId);
     if (query.exec()) {
         while (query.next()) {
             StudentMark sm;
             sm.semester = query.value(0).toInt();
             sm.subjectName = query.value(1).toString();
-            sm.score = query.value(2).toDouble();
+            sm.midScore = query.value(2).toDouble();
+            sm.assignmentScore = query.value(3).toDouble();
+            sm.finalScore = query.value(4).toDouble();
+            sm.totalScore = query.value(5).toDouble();
             list.push_back(sm);
         }
     }
+    query.finish();
     return list;
 }
 
 QVector<StudentMarkEntry> MarkManager::getStudentsWithMarks(int sectionId, int subjectId, int semester) const {
     QVector<StudentMarkEntry> list;
-    QSqlQuery query;
-    query.prepare("SELECT s.id, s.fullName, (SELECT score FROM marks WHERE student_id = s.id AND subject_id = ? AND semester = ?) as score "
-                  "FROM students s "
-                  "WHERE s.section_id = ?");
-    query.addBindValue(subjectId);
-    query.addBindValue(semester);
-    query.addBindValue(sectionId);
-
-    if (query.exec()) {
-        while (query.next()) {
-            StudentMarkEntry e;
-            e.studentId = query.value(0).toInt();
-            e.fullName = query.value(1).toString();
-            e.score = query.value(2).toDouble(); // will be 0 if no score
-            list.push_back(e);
+    
+    // Step 1: Get all students in the section
+    {
+        QSqlQuery queryStudents;
+        queryStudents.setForwardOnly(true);
+        queryStudents.prepare("SELECT id, fullName FROM students WHERE section_id = ?");
+        queryStudents.addBindValue(sectionId);
+        
+        if (queryStudents.exec()) {
+            while (queryStudents.next()) {
+                StudentMarkEntry e;
+                e.studentId = queryStudents.value(0).toInt();
+                e.fullName = queryStudents.value(1).toString();
+                e.midScore = 0.0;
+                e.assignmentScore = 0.0;
+                e.finalScore = 0.0;
+                list.push_back(e);
+            }
         }
+        queryStudents.finish();
     }
+
+    if (list.isEmpty()) return list;
+
+    // Step 2: Get marks for these students
+    {
+        QSqlQuery queryMarks;
+        queryMarks.setForwardOnly(true);
+        queryMarks.prepare("SELECT student_id, mid_score, assignment_score, final_score "
+                           "FROM marks WHERE section_id = ? AND subject_id = ? AND semester = ?");
+        queryMarks.addBindValue(sectionId);
+        queryMarks.addBindValue(subjectId);
+        queryMarks.addBindValue(semester);
+        
+        if (queryMarks.exec()) {
+            while (queryMarks.next()) {
+                int sId = queryMarks.value(0).toInt();
+                for (auto &e : list) {
+                    if (e.studentId == sId) {
+                        e.midScore = queryMarks.value(1).toDouble();
+                        e.assignmentScore = queryMarks.value(2).toDouble();
+                        e.finalScore = queryMarks.value(3).toDouble();
+                        break;
+                    }
+                }
+            }
+        }
+        queryMarks.finish();
+    }
+    
     return list;
 }
 
