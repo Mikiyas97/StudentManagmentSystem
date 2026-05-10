@@ -196,6 +196,51 @@ The application features a **premium dark theme** with:
 - **Cards & Panels**: Rounded borders, subtle shadows, and grouped information
 - **Responsive Layouts**: Proportional column sizing and stretch-based layouts
 
+### 📸 Screenshots
+
+#### 🔐 Login
+
+![Login Screen](assets/login.png)
+
+#### 🛡️ Admin Panel
+
+| Dashboard | Student Management |
+|---|---|
+| ![Dashboard](assets/dashboard.png) | ![Student Management](assets/student_info.png) |
+
+| Teacher Management | Subject Management |
+|---|---|
+| ![Teacher Management](assets/teacher.png) | ![Subject Management](assets/subject.png) |
+
+| Section Management | Mark Entry |
+|---|---|
+| ![Section Management](assets/section.png) | ![Mark Entry](assets/mark.png) |
+
+| Ranking |
+|---|
+| ![Ranking](assets/rank.png) |
+
+#### 👨‍🎓 Student Login
+
+| Student Profile |
+|---|
+| ![Student Profile](assets/student_ppf.png) |
+
+| Student Mark |
+|---| 
+| ![Student Mark](assets/student_mark.png) |
+
+#### 👨‍🏫 Teacher Login
+| Teacher Profile |
+|---|
+| ![Teacher Profile](assets/techear_ppf.png) |
+
+| Teacher Students | Teacher Marks |
+|---|---|
+| ![Teacher Students](assets/teacher_student.png) | ![Teacher Marks](assets/teacher_mark.png) |
+
+
+
 ---
 
 ## 📋 Academic Configuration
@@ -208,7 +253,14 @@ The system is pre-configured for the **Ethiopian academic calendar**:
 - **Semesters**: Semester 1, Semester 2
 
 ---
+## 🔮 Future Improvements
 
+- MySQL backend support
+- Export reports to PDF
+- Attendance management
+- Notifications system
+- Web-based version
+- Cloud synchronization
 ## 📄 License
 
 This project was developed as an academic assignment. All rights reserved by the team members listed above.
