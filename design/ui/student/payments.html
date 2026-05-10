@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments - Student Portal</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">S</div>
+          <div>
+            <div class="logo-text">SMS</div>
+            <div class="logo-subtitle">Student Portal</div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Portal</div>
+          <a href="dashboard.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="results.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            My Grades
+          </a>
+          <a href="payments.html" class="nav-link active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Payments
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar student">JD</div>
+          <div class="user-details">
+            <div class="user-name">John Doe</div>
+            <div class="user-role">Grade 10-A</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">My Payments</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <button class="btn btn-primary">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Download Receipt
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- Payment Summary -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in">
+            <div class="stat-icon success">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Total Paid</div>
+              <div class="stat-value">$5,000</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Total Fee</div>
+              <div class="stat-value">$5,000</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon success">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Balance</div>
+              <div class="stat-value">$0</div>
+              <div class="stat-change positive">All Paid</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Next Due</div>
+              <div class="stat-value">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Status Card -->
+        <div class="card" style="margin-bottom: var(--spacing-lg);">
+          <div class="card-body">
+            <div style="display: flex; align-items: center; gap: var(--spacing-lg);">
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--success-color); display: flex; align-items: center; justify-content: center;">
+                <svg width="32" height="32" fill="none" stroke="white" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-xs);">All Fees Paid!</h3>
+                <p style="color: var(--text-secondary);">Your tuition and all associated fees for the current semester have been paid in full.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Payment History</h2>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Jan 15, 2026</td>
+                    <td>Spring 2026 Tuition</td>
+                    <td>$2,500</td>
+                    <td>Bank Transfer</td>
+                    <td><span class="status-badge active">Completed</span></td>
+                    <td>
+                      <button class="action-btn view" title="Download Receipt">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Sep 10, 2025</td>
+                    <td>Fall 2025 Tuition</td>
+                    <td>$2,500</td>
+                    <td>Bank Transfer</td>
+                    <td><span class="status-badge active">Completed</span></td>
+                    <td>
+                      <button class="action-btn view" title="Download Receipt">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fee Breakdown -->
+        <div class="card" style="margin-top: var(--spacing-lg);">
+          <div class="card-header">
+            <h2 class="card-title">Fee Breakdown - Academic Year 2025-2026</h2>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; gap: var(--spacing-md);">
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <span style="font-weight: 500;">Fall 2025 Tuition</span>
+                <span style="font-weight: 600;">$2,500</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <span style="font-weight: 500;">Spring 2026 Tuition</span>
+                <span style="font-weight: 600;">$2,500</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <span style="font-weight: 500;">Technology Fee</span>
+                <span style="font-weight: 600;">$150</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <span style="font-weight: 500;">Library Fee</span>
+                <span style="font-weight: 600;">$50</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <span style="font-weight: 500;">Student Services</span>
+                <span style="font-weight: 600;">$100</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--radius-md); font-weight: 600;">
+                <span>Total</span>
+                <span>$5,300</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

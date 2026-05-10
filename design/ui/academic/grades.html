@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grades - Academic Module</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">S</div>
+          <div>
+            <div class="logo-text">SMS</div>
+            <div class="logo-subtitle">Academic Module</div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Academic</div>
+          <a href="attendance.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+            Attendance
+          </a>
+          <a href="grades.html" class="nav-link active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Grades
+          </a>
+          <a href="../student/records.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            Student Records
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar teacher">RP</div>
+          <div class="user-details">
+            <div class="user-name">Robert Parker</div>
+            <div class="user-role">Teacher</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Grade Management</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <button class="btn btn-primary">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Grade
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab active">All Grades</button>
+          <button class="tab">Mathematics</button>
+          <button class="tab">Science</button>
+          <button class="tab">English</button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in">
+            <div class="stat-icon primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Class Average</div>
+              <div class="stat-value">82.4</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon success">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Highest Score</div>
+              <div class="stat-value">98</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon warning">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Needs Improvement</div>
+              <div class="stat-value">8</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Assignments</div>
+              <div class="stat-value">24</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grades Table -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Student Grades</h2>
+            <div class="d-flex gap-2">
+              <select class="filter-select">
+                <option>All Classes</option>
+                <option>Grade 10-A</option>
+                <option>Grade 10-B</option>
+              </select>
+              <select class="filter-select">
+                <option>All Terms</option>
+                <option>Term 1</option>
+                <option>Term 2</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Assignment</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#STU-001</td>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-avatar blue">JD</div>
+                        <div class="person-name">John Doe</div>
+                      </div>
+                    </td>
+                    <td>Mathematics</td>
+                    <td>Quiz 1</td>
+                    <td>92/100</td>
+                    <td><span class="status-badge active">A</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn edit" title="Edit"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#STU-002</td>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-avatar green">SW</div>
+                        <div class="person-name">Sarah Wilson</div>
+                      </div>
+                    </td>
+                    <td>Mathematics</td>
+                    <td>Quiz 1</td>
+                    <td>88/100</td>
+                    <td><span class="status-badge active">B+</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn edit" title="Edit"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#STU-003</td>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-avatar orange">MC</div>
+                        <div class="person-name">Michael Chen</div>
+                      </div>
+                    </td>
+                    <td>Mathematics</td>
+                    <td>Quiz 1</td>
+                    <td>76/100</td>
+                    <td><span class="status-badge pending">C</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn edit" title="Edit"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>#STU-004</td>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-avatar blue">EB</div>
+                        <div class="person-name">Emily Brown</div>
+                      </div>
+                    </td>
+                    <td>Mathematics</td>
+                    <td>Quiz 1</td>
+                    <td>95/100</td>
+                    <td><span class="status-badge active">A</span></td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn edit" title="Edit"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="pagination">
+              <div class="pagination-info">Showing 1 to 4 of 156 entries</div>
+              <div class="pagination-controls">
+                <button class="page-btn" disabled><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Student Management System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">S</div>
+          <div>
+            <div class="logo-text">SMS</div>
+            <div class="logo-subtitle">Student Management</div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main Menu</div>
+          <a href="dashboard.html" class="nav-link active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="students.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            Students
+          </a>
+          <a href="add-student.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
+            Add Student
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">AD</div>
+          <div class="user-details">
+            <div class="user-name">Admin User</div>
+            <div class="user-role">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <button class="icon-btn" title="Notifications">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="badge"></span>
+            </button>
+            <button class="icon-btn" title="Settings">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in">
+            <div class="stat-icon primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Total Students</div>
+              <div class="stat-value">1,248</div>
+              <div class="stat-change positive">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                </svg>
+                +12.5%
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon success">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">New Registrations</div>
+              <div class="stat-value">86</div>
+              <div class="stat-change positive">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                </svg>
+                +8.2%
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon warning">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Pending Approvals</div>
+              <div class="stat-value">23</div>
+              <div class="stat-change negative">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+                -5.3%
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Active Courses</div>
+              <div class="stat-value">42</div>
+              <div class="stat-change positive">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                </svg>
+                +3.1%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Students Table -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Students</h2>
+            <a href="students.html" class="btn btn-secondary btn-sm">View All</a>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Date Added</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>#STU-001</td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">JD</div>
+                        <div>
+                          <div class="student-name">John Doe</div>
+                          <div class="student-email">john.doe@email.com</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Computer Science</td>
+                    <td><span class="status-badge active">Active</span></td>
+                    <td>Apr 28, 2026</td>
+                  </tr>
+                  <tr>
+                    <td>#STU-002</td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">SW</div>
+                        <div>
+                          <div class="student-name">Sarah Wilson</div>
+                          <div class="student-email">sarah.w@email.com</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Business Administration</td>
+                    <td><span class="status-badge active">Active</span></td>
+                    <td>Apr 27, 2026</td>
+                  </tr>
+                  <tr>
+                    <td>#STU-003</td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">MC</div>
+                        <div>
+                          <div class="student-name">Michael Chen</div>
+                          <div class="student-email">m.chen@email.com</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Engineering</td>
+                    <td><span class="status-badge pending">Pending</span></td>
+                    <td>Apr 26, 2026</td>
+                  </tr>
+                  <tr>
+                    <td>#STU-004</td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">EB</div>
+                        <div>
+                          <div class="student-name">Emily Brown</div>
+                          <div class="student-email">emily.b@email.com</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Medicine</td>
+                    <td><span class="status-badge active">Active</span></td>
+                    <td>Apr 25, 2026</td>
+                  </tr>
+                  <tr>
+                    <td>#STU-005</td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">DJ</div>
+                        <div>
+                          <div class="student-name">David Johnson</div>
+                          <div class="student-email">d.johnson@email.com</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Law</td>
+                    <td><span class="status-badge inactive">Inactive</span></td>
+                    <td>Apr 24, 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

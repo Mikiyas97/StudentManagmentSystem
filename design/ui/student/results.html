@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Grades - Student Portal</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">S</div>
+          <div>
+            <div class="logo-text">SMS</div>
+            <div class="logo-subtitle">Student Portal</div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Portal</div>
+          <a href="dashboard.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            Dashboard
+          </a>
+          <a href="results.html" class="nav-link active">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            My Grades
+          </a>
+          <a href="payments.html" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Payments
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar student">JD</div>
+          <div class="user-details">
+            <div class="user-name">John Doe</div>
+            <div class="user-role">Grade 10-A</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">My Grades</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-actions">
+            <select class="filter-select">
+              <option value="">All Semesters</option>
+              <option value="spring2026">Spring 2026</option>
+              <option value="fall2025">Fall 2025</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- GPA Summary -->
+        <div class="stats-grid">
+          <div class="stat-card fade-in">
+            <div class="stat-icon primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Current GPA</div>
+              <div class="stat-value">3.85</div>
+              <div class="stat-change positive">Top 10%</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon success">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Credits Earned</div>
+              <div class="stat-value">48</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon warning">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Courses</div>
+              <div class="stat-value">6</div>
+            </div>
+          </div>
+          
+          <div class="stat-card fade-in">
+            <div class="stat-icon info">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Average</div>
+              <div class="stat-value">91.2%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Course Grades Table -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Course Grades - Spring 2026</h2>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Course</th>
+                    <th>Instructor</th>
+                    <th>Credits</th>
+                    <th>Midterm</th>
+                    <th>Final</th>
+                    <th>Assignments</th>
+                    <th>Total</th>
+                    <th>Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">Mathematics</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">MATH-201</div>
+                      </div>
+                    </td>
+                    <td>Dr. Smith</td>
+                    <td>4</td>
+                    <td>88/100</td>
+                    <td>92/100</td>
+                    <td>95/100</td>
+                    <td>91.7%</td>
+                    <td><span class="status-badge active">A</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">Physics</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">PHYS-101</div>
+                      </div>
+                    </td>
+                    <td>Dr. Johnson</td>
+                    <td>4</td>
+                    <td>85/100</td>
+                    <td>90/100</td>
+                    <td>88/100</td>
+                    <td>87.7%</td>
+                    <td><span class="status-badge active">B+</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">English</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">ENG-101</div>
+                      </div>
+                    </td>
+                    <td>Ms. Davis</td>
+                    <td>3</td>
+                    <td>90/100</td>
+                    <td>95/100</td>
+                    <td>98/100</td>
+                    <td>94.3%</td>
+                    <td><span class="status-badge active">A</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">History</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">HIST-101</div>
+                      </div>
+                    </td>
+                    <td>Mr. Wilson</td>
+                    <td>3</td>
+                    <td>82/100</td>
+                    <td>88/100</td>
+                    <td>90/100</td>
+                    <td>86.7%</td>
+                    <td><span class="status-badge active">B</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">Computer Science</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">CS-101</div>
+                      </div>
+                    </td>
+                    <td>Dr. Brown</td>
+                    <td>4</td>
+                    <td>94/100</td>
+                    <td>96/100</td>
+                    <td>98/100</td>
+                    <td>96%</td>
+                    <td><span class="status-badge active">A+</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="person-info">
+                        <div class="person-name" style="font-weight: 500;">Art</div>
+                        <div class="person-name" style="font-size: 0.75rem; color: var(--text-secondary);">ART-101</div>
+                      </div>
+                    </td>
+                    <td>Ms. Garcia</td>
+                    <td>2</td>
+                    <td>91/100</td>
+                    <td>93/100</td>
+                    <td>95/100</td>
+                    <td>93%</td>
+                    <td><span class="status-badge active">A</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade Scale Legend -->
+        <div class="card" style="margin-top: var(--spacing-lg);">
+          <div class="card-header">
+            <h2 class="card-title">Grade Scale</h2>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--spacing-md);">
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">A+</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">95-100%</div>
+              </div>
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">A</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">90-94%</div>
+              </div>
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">B+</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">85-89%</div>
+              </div>
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">B</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">80-84%</div>
+              </div>
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning-color);">C</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">70-79%</div>
+              </div>
+              <div style="text-align: center; padding: var(--spacing-md); background: var(--bg-primary); border-radius: var(--radius-md);">
+                <div style="font-size: 1.5rem; font-weight: 700; color: var(--danger-color);">F</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">Below 70%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
