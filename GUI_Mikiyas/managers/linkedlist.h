@@ -18,8 +18,7 @@
 // ============================================================================
 
 template <typename T>
-class LinkedList {
-public:
+struct LinkedList {
     // --- Node Structure ---
     // Each node holds data and pointers to previous and next nodes.
     struct Node {
@@ -30,12 +29,10 @@ public:
         Node(const T& d) : data(d), prev(nullptr), next(nullptr) {}
     };
 
-private:
     Node* head;   // Pointer to the first node
     Node* tail;   // Pointer to the last node
     int count;    // Number of elements in the list
 
-public:
     // ========================================================================
     // Construction / Destruction
     // ========================================================================
@@ -294,7 +291,6 @@ public:
         tail = current;
     }
 
-private:
     // Recursive merge sort — splits the list and merges sorted halves.
     // Returns the new head of the sorted sub-list.
     Node* mergeSortRecursive(Node* start, std::function<bool(const T&, const T&)>& comparator) {

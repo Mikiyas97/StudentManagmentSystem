@@ -16,11 +16,9 @@
 // ============================================================================
 
 template <typename T>
-class Queue {
-private:
+struct Queue {
     LinkedList<T> list;
 
-public:
     Queue() {}
     ~Queue() {}
 

@@ -16,11 +16,9 @@
 // ============================================================================
 
 template <typename T>
-class Stack {
-private:
+struct Stack {
     LinkedList<T> list;
 
-public:
     Stack() {}
     ~Stack() {}
 
