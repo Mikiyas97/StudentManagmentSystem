@@ -104,7 +104,7 @@ bool setupDatabase() {
     QSqlQuery checkAdmin("SELECT * FROM users WHERE username = 'admin'");
     if (!checkAdmin.next()) {
         query.exec("INSERT INTO users (username, password, role, relatedId) "
-                   "VALUES ('admin', 'admin123', 'admin', -1)");
+                   "VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'admin', -1)");
     }
                
     return true;

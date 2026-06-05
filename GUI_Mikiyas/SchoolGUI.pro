@@ -27,6 +27,9 @@ SOURCES += main.cpp \
            pages/profilepage.cpp
 
 HEADERS += mainwindow.h \
+           managers/linkedlist.h \
+           managers/stack.h \
+           managers/queue.h \
            logindialog.h \
            managers/studentmanager.h \
            managers/reportmanager.h \

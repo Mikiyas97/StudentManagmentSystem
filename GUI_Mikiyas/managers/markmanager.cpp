@@ -50,7 +50,7 @@ double MarkManager::getStudentAverage(int studentId, int yearId, int semester) c
 }
 
 QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId, int semester) const {
-    QVector<RankInfo> ranking;
+    LinkedList<RankInfo> ranking;
     QSqlQuery query;
     // Join with students to get names, and mark_approvals to only count approved marks
     query.prepare("SELECT m.student_id, s.fullName, SUM(m.total_score) as total, COUNT(m.subject_id) as sub_count "
@@ -58,14 +58,12 @@ QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId
                   "JOIN students s ON m.student_id = s.id "
                   "JOIN mark_approvals ma ON m.section_id = ma.section_id AND m.subject_id = ma.subject_id AND m.semester = ma.semester "
                   "WHERE m.section_id = ? AND m.year_id = ? AND m.semester = ? AND ma.is_approved = 1 "
-                  "GROUP BY m.student_id "
-                  "ORDER BY total DESC");
+                  "GROUP BY m.student_id"); // Removed ORDER BY, will sort in memory
     query.addBindValue(sectionId);
     query.addBindValue(yearId);
     query.addBindValue(semester);
     
     if (query.exec()) {
-        int r = 1;
         while (query.next()) {
             RankInfo info;
             info.studentId = query.value(0).toInt();
@@ -73,11 +71,23 @@ QVector<RankInfo> MarkManager::calculateSectionRanking(int sectionId, int yearId
             info.totalScore = query.value(2).toDouble();
             int counts = query.value(3).toInt();
             info.average = (counts > 0) ? (info.totalScore / counts) : 0;
-            info.rank = r++;
+            info.rank = 0; // Assigned later
             ranking.push_back(info);
         }
     }
-    return ranking;
+    
+    // Sort in memory using merge sort (O(n log n))
+    ranking.mergeSort([](const RankInfo& a, const RankInfo& b) {
+        return a.totalScore > b.totalScore; // Descending order
+    });
+    
+    // Assign ranks after sorting
+    int r = 1;
+    for (auto& info : ranking) {
+        info.rank = r++;
+    }
+    
+    return ranking.toQVector();
 }
 
 bool MarkManager::isRankingApproved(int sectionId, int yearId, int semester) const {
@@ -123,13 +133,13 @@ bool MarkManager::isSubjectMarksApproved(int sectionId, int subjectId, int semes
 }
 
 QVector<StudentMark> MarkManager::getStudentMarks(int studentId) const {
-    QVector<StudentMark> list;
+    LinkedList<StudentMark> list;
     QSqlQuery query;
     query.setForwardOnly(true);
     query.prepare("SELECT m.semester, sub.name, m.mid_score, m.assignment_score, m.final_score, m.total_score FROM marks m "
                   "JOIN subjects sub ON m.subject_id = sub.id "
                   "JOIN mark_approvals ma ON m.section_id = ma.section_id AND m.subject_id = ma.subject_id AND m.semester = ma.semester "
-                  "WHERE m.student_id = ? AND ma.is_approved = 1 ORDER BY m.semester ASC, sub.name ASC");
+                  "WHERE m.student_id = ? AND ma.is_approved = 1"); // Removed ORDER BY
     query.addBindValue(studentId);
     if (query.exec()) {
         while (query.next()) {
@@ -144,7 +154,14 @@ QVector<StudentMark> MarkManager::getStudentMarks(int studentId) const {
         }
     }
     query.finish();
-    return list;
+    
+    // Sort in memory using merge sort
+    list.mergeSort([](const StudentMark& a, const StudentMark& b) {
+        if (a.semester != b.semester) return a.semester < b.semester;
+        return a.subjectName < b.subjectName;
+    });
+    
+    return list.toQVector();
 }
 
 QVector<StudentMarkEntry> MarkManager::getStudentsWithMarks(int sectionId, int subjectId, int semester) const {

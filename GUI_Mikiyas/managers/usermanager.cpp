@@ -2,14 +2,20 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
+#include <QCryptographicHash>
 
 UserManager::UserManager() {}
+
+QString UserManager::hashPassword(const QString& rawPassword) {
+    QByteArray hash = QCryptographicHash::hash(rawPassword.toUtf8(), QCryptographicHash::Sha256);
+    return QString(hash.toHex());
+}
 
 bool UserManager::addUser(const User &u) {
     QSqlQuery q;
     q.prepare("INSERT OR REPLACE INTO users (username, password, role, relatedId) VALUES (?, ?, ?, ?)");
     q.addBindValue(u.username);
-    q.addBindValue(u.password);
+    q.addBindValue(hashPassword(u.password)); // Hash before storing
     q.addBindValue(u.role);
     q.addBindValue(u.relatedId);
     return q.exec();
@@ -18,7 +24,7 @@ bool UserManager::addUser(const User &u) {
 bool UserManager::changePassword(const QString &username, const QString &newPassword) {
     QSqlQuery q;
     q.prepare("UPDATE users SET password = ? WHERE username = ?");
-    q.addBindValue(newPassword);
+    q.addBindValue(hashPassword(newPassword)); // Hash before updating
     q.addBindValue(username);
     return q.exec();
 }
@@ -67,8 +73,8 @@ bool UserManager::addTeacher(const Teacher &t, const QString &password) {
     return false;
 }
 
-QVector<Teacher> UserManager::getTeachers() const {
-    QVector<Teacher> list;
+LinkedList<Teacher> UserManager::loadTeachersAsLinkedList() const {
+    LinkedList<Teacher> list;
     QSqlQuery q("SELECT id, fullName, gender, date_of_birth, phone, email, subject_id FROM teachers");
     while (q.next()) {
         Teacher t;
@@ -84,40 +90,39 @@ QVector<Teacher> UserManager::getTeachers() const {
     return list;
 }
 
+QVector<Teacher> UserManager::getTeachers() const {
+    LinkedList<Teacher> list = loadTeachersAsLinkedList();
+    return list.toQVector();
+}
+
 QVector<Teacher> UserManager::filterTeachers(const QString &searchText, const QString &sortBy) const {
-    QVector<Teacher> list;
-    QSqlQuery q;
-    QString queryStr = "SELECT id, fullName, gender, date_of_birth, phone, email, subject_id FROM teachers";
-    if (!searchText.isEmpty()) {
-        queryStr += " WHERE fullName LIKE ? OR phone LIKE ? OR email LIKE ?";
-    }
+    LinkedList<Teacher> allTeachers = loadTeachersAsLinkedList();
     
+    // 1. Filter
+    LinkedList<Teacher> filtered = allTeachers.findAll([&](const Teacher& t) {
+        if (searchText.isEmpty()) return true;
+        QString lowerSearch = searchText.toLower();
+        return t.fullName.toLower().contains(lowerSearch) || 
+               t.phone.contains(lowerSearch) || 
+               t.email.toLower().contains(lowerSearch);
+    });
+    
+    // 2. Sort
     if (!sortBy.isEmpty()) {
-        queryStr += " ORDER BY " + sortBy;
+        bool asc = sortBy.endsWith("ASC");
+        bool sortById = sortBy.startsWith("id");
+        
+        filtered.mergeSort([asc, sortById](const Teacher& a, const Teacher& b) {
+            if (sortById) {
+                return asc ? (a.id < b.id) : (a.id > b.id);
+            } else {
+                return asc ? (a.fullName.toLower() < b.fullName.toLower()) 
+                           : (a.fullName.toLower() > b.fullName.toLower());
+            }
+        });
     }
     
-    q.prepare(queryStr);
-    if (!searchText.isEmpty()) {
-        QString likeStr = "%" + searchText + "%";
-        q.addBindValue(likeStr);
-        q.addBindValue(likeStr);
-        q.addBindValue(likeStr);
-    }
-    
-    if (q.exec()) {
-        while (q.next()) {
-            Teacher t;
-            t.id = q.value(0).toInt();
-            t.fullName = q.value(1).toString();
-            t.gender = q.value(2).toString();
-            t.dateOfBirth = q.value(3).toString();
-            t.phone = q.value(4).toString();
-            t.email = q.value(5).toString();
-            t.subject_id = q.value(6).toInt();
-            list.push_back(t);
-        }
-    }
-    return list;
+    return filtered.toQVector();
 }
 
 Teacher UserManager::getTeacherById(int id) const {

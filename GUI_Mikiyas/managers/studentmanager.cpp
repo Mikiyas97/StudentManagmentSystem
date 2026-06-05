@@ -100,6 +100,21 @@ bool StudentManager::softDeleteStudent(int id) {
     QSqlQuery query;
     query.prepare("UPDATE students SET status='Inactive' WHERE id=:id");
     query.bindValue(":id", id);
+    if (query.exec()) {
+        recentlyDeletedIds.push(id); // Push to Stack for Undo feature
+        return true;
+    }
+    return false;
+}
+
+bool StudentManager::undoLastDelete() {
+    if (recentlyDeletedIds.isEmpty()) return false;
+    
+    int idToRestore = recentlyDeletedIds.pop(); // Pop from LIFO Stack
+    
+    QSqlQuery query;
+    query.prepare("UPDATE students SET status='Active' WHERE id=:id");
+    query.bindValue(":id", idToRestore);
     return query.exec();
 }
 
@@ -115,7 +130,9 @@ void StudentManager::bulkSoftDelete(const QVector<int> &ids) {
     query.prepare("UPDATE students SET status='Inactive' WHERE id=:id");
     for (int id : ids) {
         query.bindValue(":id", id);
-        query.exec();
+        if (query.exec()) {
+            recentlyDeletedIds.push(id); // Push to Stack for Undo feature
+        }
     }
 }
 
@@ -129,11 +146,21 @@ void StudentManager::bulkHardDelete(const QVector<int> &ids) {
 }
 
 void StudentManager::bulkAssignClass(const QVector<int> &ids, const QString &sectionIdStr) {
+    // 1. Enqueue all IDs into our custom FIFO Queue
+    Queue<int> processingQueue;
+    for (int id : ids) {
+        processingQueue.enqueue(id);
+    }
+    
+    int secId = sectionIdStr.toInt();
     QSqlQuery query;
     query.prepare("UPDATE students SET section_id=:sec WHERE id=:id");
-    int secId = sectionIdStr.toInt();
-    for (int id : ids) {
-        query.bindValue(":id", id);
+    
+    // 2. Process batch operation by dequeuing one by one (FIFO order)
+    while (!processingQueue.isEmpty()) {
+        int currentId = processingQueue.dequeue();
+        
+        query.bindValue(":id", currentId);
         query.bindValue(":sec", secId);
         query.exec();
     }
@@ -159,29 +186,78 @@ static Student parseStudent(QSqlQuery &q) {
     return s;
 }
 
-QVector<Student> StudentManager::getStudents() const {
-    QVector<Student> list;
-    QSqlQuery query("SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
-                   "FROM students s "
-                   "LEFT JOIN grade_levels g ON s.grade_id = g.id "
-                   "LEFT JOIN sections sec ON s.section_id = sec.id "
-                   "LEFT JOIN streams st ON s.stream_id = st.id");
-    while (query.next()) list.push_back(parseStudent(query));
-    return list;
-}
-
-Student StudentManager::getStudentById(int id) const {
-    QSqlQuery query;
-    query.prepare("SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
+LinkedList<Student> StudentManager::loadStudentsAsLinkedList(int teacherId) const {
+    LinkedList<Student> list;
+    
+    QString sql = "SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
                   "FROM students s "
                   "LEFT JOIN grade_levels g ON s.grade_id = g.id "
                   "LEFT JOIN sections sec ON s.section_id = sec.id "
-                  "LEFT JOIN streams st ON s.stream_id = st.id "
-                  "WHERE s.id=:id");
-    query.bindValue(":id", id);
-    if (query.exec() && query.next()) {
-        return parseStudent(query);
+                  "LEFT JOIN streams st ON s.stream_id = st.id";
+                  
+    if (teacherId > 0) {
+        sql += " WHERE s.section_id IN (SELECT section_id FROM teaching_assignments WHERE teacher_id = ?)";
     }
+    
+    QSqlQuery query;
+    query.prepare(sql);
+    if (teacherId > 0) query.addBindValue(teacherId);
+    
+    if (query.exec()) {
+        while (query.next()) {
+            list.push_back(parseStudent(query));
+        }
+    }
+    return list;
+}
+
+QVector<Student> StudentManager::getStudents() const {
+    // 1. Load all students into a linked list
+    LinkedList<Student> list = loadStudentsAsLinkedList();
+    
+    // 2. Convert to QVector for UI consumption
+    return list.toQVector();
+}
+
+// ========================================================================
+// Algorithm: Binary Search — O(log n)
+// ========================================================================
+// This function demonstrates a custom binary search algorithm without using
+// the standard library. Binary search requires random access (O(1) indexing),
+// which is why we convert the linked list to a QVector first. 
+// Time Complexity: O(log n) where n is the number of students.
+// ========================================================================
+Student StudentManager::getStudentById(int id) const {
+    // 1. Load all students into a LinkedList
+    LinkedList<Student> list = loadStudentsAsLinkedList();
+    
+    // 2. Ensure they are sorted by ID using our O(n log n) merge sort
+    list.mergeSort([](const Student& a, const Student& b) {
+        return a.id < b.id; // Ascending order
+    });
+    
+    // 3. Convert to QVector for O(1) random access
+    QVector<Student> sortedVector = list.toQVector();
+    
+    // 4. Custom Binary Search implementation (no std::binary_search)
+    int left = 0;
+    int right = sortedVector.size() - 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (sortedVector[mid].id == id) {
+            return sortedVector[mid]; // Match found
+        }
+        
+        if (sortedVector[mid].id < id) {
+            left = mid + 1; // Search right half
+        } else {
+            right = mid - 1; // Search left half
+        }
+    }
+    
+    // Return empty student if not found
     Student empty; empty.id = -1; return empty;
 }
 
@@ -189,50 +265,54 @@ QVector<Student> StudentManager::filter(const QString &nameOrId,
                                          const QString &gradeFilter,
                                          const QString &statusFilter,
                                          int teacherId) const {
-    QString sql = "SELECT s.*, g.name as grade_name, sec.name as section_name, st.name as stream_name "
-                  "FROM students s "
-                  "LEFT JOIN grade_levels g ON s.grade_id = g.id "
-                  "LEFT JOIN sections sec ON s.section_id = sec.id "
-                  "LEFT JOIN streams st ON s.stream_id = st.id "
-                  "WHERE 1=1";
+    // 1. Load data from SQLite into a Linked List (teacher scope already applied)
+    LinkedList<Student> allStudents = loadStudentsAsLinkedList(teacherId);
     
-    QVariantList params;
-
-    if (teacherId > 0) {
-        sql += " AND s.section_id IN (SELECT section_id FROM teaching_assignments WHERE teacher_id = ?)";
-        params << teacherId;
-    }
-
-    if (!nameOrId.isEmpty()) {
-        sql += " AND (s.id LIKE ? OR s.fullName LIKE ?)";
-        params << "%" + nameOrId + "%" << "%" + nameOrId + "%";
-    }
-    if (!gradeFilter.isEmpty() && gradeFilter != "All") {
-        sql += " AND g.name = ?";
-        params << gradeFilter;
-    }
-    if (!statusFilter.isEmpty() && statusFilter != "All") {
-        sql += " AND s.status = ?";
-        params << statusFilter;
-    }
+    // 2. Filter the data in-memory using O(n) linked list traversal
+    LinkedList<Student> filtered = allStudents.findAll([&](const Student& s) {
+        // Name/ID match
+        bool matchesName = true;
+        if (!nameOrId.isEmpty()) {
+            QString lowerSearch = nameOrId.toLower();
+            matchesName = s.fullName.toLower().contains(lowerSearch) || 
+                          QString::number(s.id).contains(lowerSearch);
+        }
+        
+        // Grade match
+        bool matchesGrade = true;
+        if (!gradeFilter.isEmpty() && gradeFilter != "All") {
+            matchesGrade = (s.gradeName == gradeFilter);
+        }
+        
+        // Status match
+        bool matchesStatus = true;
+        if (!statusFilter.isEmpty() && statusFilter != "All") {
+            matchesStatus = (s.status == statusFilter);
+        }
+        
+        return matchesName && matchesGrade && matchesStatus;
+    });
     
-    if (currentSortField == ByName) {
-        sql += " ORDER BY s.fullName " + QString(currentSortAscending ? "ASC" : "DESC");
-    } else if (currentSortField == ByClass) {
-        sql += " ORDER BY sec.name " + QString(currentSortAscending ? "ASC" : "DESC");
-    } else {
-        sql += " ORDER BY s.id " + QString(currentSortAscending ? "ASC" : "DESC");
-    }
-
-    QVector<Student> list;
-    QSqlQuery query;
-    query.prepare(sql);
-    for (const QVariant &p : params) query.addBindValue(p);
+    // 3. Sort the filtered data using O(n log n) merge sort on the linked list
+    bool asc = currentSortAscending;
+    SortField field = currentSortField;
     
-    if (query.exec()) {
-        while (query.next()) list.push_back(parseStudent(query));
-    }
-    return list;
+    filtered.mergeSort([asc, field](const Student& a, const Student& b) {
+        if (field == ByName) {
+            return asc ? (a.fullName.toLower() < b.fullName.toLower()) 
+                       : (a.fullName.toLower() > b.fullName.toLower());
+        } else if (field == ByClass) {
+            // Sort by section name
+            return asc ? (a.sectionName.toLower() < b.sectionName.toLower())
+                       : (a.sectionName.toLower() > b.sectionName.toLower());
+        } else {
+            // Default: Sort by ID
+            return asc ? (a.id < b.id) : (a.id > b.id);
+        }
+    });
+    
+    // 4. Convert the final processed linked list to a QVector for the UI
+    return filtered.toQVector();
 }
 
 // --------------- Sorting ---------------

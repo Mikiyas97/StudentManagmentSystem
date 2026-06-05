@@ -3,6 +3,9 @@
 
 #include <QString>
 #include <QVector>
+#include "linkedlist.h"
+#include "stack.h"
+#include "queue.h"
 
 struct Student {
     int id;
@@ -29,16 +32,21 @@ public:
     bool addStudent(const Student &s);
     bool updateStudent(const Student &s);
     bool softDeleteStudent(int id);     // sets status to "Inactive"
-    bool hardDeleteStudent(int id);     // removes from file
+    bool hardDeleteStudent(int id);     // removes from database
     void bulkSoftDelete(const QVector<int> &ids);
     void bulkHardDelete(const QVector<int> &ids);
     void bulkAssignClass(const QVector<int> &ids, const QString &cls);
+    
+    // Stack-based undo feature
+    bool undoLastDelete();
 
-    // Query
+    // Query — returns QVector for UI, internally uses LinkedList
     QVector<Student> getStudents() const;
+    
+    // O(log n) Custom Binary Search
     Student getStudentById(int id) const;
 
-    // Advanced search & filter (combined)
+    // Advanced search & filter (combined) — uses LinkedList + merge sort
     QVector<Student> filter(const QString &nameOrId = "",
                            const QString &gradeFilter = "All",
                            const QString &statusFilter = "All",
@@ -52,9 +60,16 @@ private:
     SortField currentSortField = ById;
     bool currentSortAscending = true;
     
+    // Stack to track recently deleted students for the Undo feature
+    Stack<int> recentlyDeletedIds;
+    
+    // Linked list data loading — loads all students from DB into LinkedList
+    LinkedList<Student> loadStudentsAsLinkedList(int teacherId = -1) const;
+    
     // Legacy file IO methods removed
     void loadFromFile();
     void saveToFile();
 };
 
 #endif // STUDENTMANAGER_H
+

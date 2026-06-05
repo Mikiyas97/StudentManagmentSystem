@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QVector>
+#include "linkedlist.h"
 
 struct Mark {
     int id;

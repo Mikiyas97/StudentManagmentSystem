@@ -38,7 +38,18 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent)
     QPushButton *addBtn = new QPushButton("+ Add Student");
     addBtn->setCursor(Qt::PointingHandCursor);
     topBar->addWidget(addBtn);
-    if (userRole != "admin") addBtn->setVisible(false);
+    
+    QPushButton *undoBtn = new QPushButton("↶ Undo Delete");
+    undoBtn->setCursor(Qt::PointingHandCursor);
+    undoBtn->setObjectName("secondaryButton");
+    topBar->addWidget(undoBtn);
+    connect(undoBtn, &QPushButton::clicked, this, &StudentPage::onUndoDelete);
+    
+    if (userRole != "admin") {
+        addBtn->setVisible(false);
+        undoBtn->setVisible(false);
+    }
+    
     topBar->addStretch();
 
     // Sort combo
@@ -348,9 +359,9 @@ void StudentPage::onDeleteStudent() {
     if (row < 0) { QMessageBox::warning(this, "Error", "Select a student."); return; }
     int id = table->item(row, 1)->text().toInt();
     if (QMessageBox::question(this, "Confirm Delete",
-        "This will permanently delete student ID " + QString::number(id) + ".\n\nProceed?",
+        "This will deactivate student ID " + QString::number(id) + ".\n\nProceed?",
         QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-        manager.hardDeleteStudent(id);
+        manager.softDeleteStudent(id); // Use soft delete to enable Stack-based Undo
         refreshTable();
     }
 }
@@ -361,8 +372,8 @@ void StudentPage::onBulkDelete() {
     QVector<int> ids = getCheckedIds();
     if (ids.isEmpty()) return;
     if (QMessageBox::question(this, "Bulk Delete",
-        "Permanently delete " + QString::number(ids.size()) + " student(s)?") == QMessageBox::Yes) {
-        manager.bulkHardDelete(ids);
+        "Deactivate " + QString::number(ids.size()) + " student(s)?") == QMessageBox::Yes) {
+        manager.bulkSoftDelete(ids); // Use soft delete to enable Stack-based Undo
         refreshTable();
     }
 }
@@ -375,8 +386,17 @@ void StudentPage::onBulkAssignClass() {
         "Enter class for " + QString::number(ids.size()) + " student(s):",
         QLineEdit::Normal, "", &ok);
     if (ok && !cls.isEmpty()) {
-        manager.bulkAssignClass(ids, cls);
+        manager.bulkAssignClass(ids, cls); // This now uses our custom FIFO Queue internally
         refreshTable();
+    }
+}
+
+void StudentPage::onUndoDelete() {
+    if (manager.undoLastDelete()) {
+        QMessageBox::information(this, "Undo Successful", "The last deleted student has been restored to 'Active' status.");
+        refreshTable();
+    } else {
+        QMessageBox::warning(this, "Undo Failed", "There are no recent deletions to undo.");
     }
 }
 

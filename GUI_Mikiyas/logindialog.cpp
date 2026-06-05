@@ -110,9 +110,21 @@ void LoginDialog::onLogin() {
     UserManager um;
     User u = um.getUserByUsername(username);
 
-    if (u.username.isEmpty() || u.password != password) {
+    if (u.username.isEmpty()) {
         errorLabel->setText("Invalid credentials!");
         return;
+    }
+
+    // Check if password matches the secure hash
+    if (u.password != UserManager::hashPassword(password)) {
+        // Fallback: Check if it matches the legacy plain-text password
+        if (u.password == password) {
+            // Seamless migration: upgrade the password to SHA-256 in the database
+            um.changePassword(username, password);
+        } else {
+            errorLabel->setText("Invalid credentials!");
+            return;
+        }
     }
 
     role = u.role;

@@ -3,8 +3,10 @@
 
 #include <QString>
 #include <QVector>
+#include <QCryptographicHash>
 #include "sectionmanager.h"
 #include "subjectmanager.h"
+#include "linkedlist.h"
 
 struct Teacher {
     int id;
@@ -27,6 +29,9 @@ class UserManager {
 public:
     UserManager();
     
+    // Security
+    static QString hashPassword(const QString& rawPassword);
+    
     // Users
     bool addUser(const User &u);
     bool changePassword(const QString &username, const QString &newPassword);
@@ -45,6 +50,9 @@ public:
     QVector<Section> getTeacherSections(int teacherId, int gradeId) const;
     QVector<Subject> getTeacherSubjects(int teacherId, int sectionId) const;
     QVector<Teacher> getTeachersBySubject(int subjectId) const;
+    
+private:
+    LinkedList<Teacher> loadTeachersAsLinkedList() const;
 };
 
 #endif // USERMANAGER_H
