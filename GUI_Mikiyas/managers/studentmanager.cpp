@@ -100,29 +100,49 @@ bool StudentManager::softDeleteStudent(int id) {
     QSqlQuery query;
     query.prepare("UPDATE students SET status='Inactive' WHERE id=:id");
     query.bindValue(":id", id);
-    if (query.exec()) {
-        recentlyDeletedIds.push(id); // Push to Stack for Undo feature
-        return true;
-    }
-    return false;
-}
-
-bool StudentManager::undoLastDelete() {
-    if (recentlyDeletedIds.isEmpty()) return false;
-    
-    int idToRestore = recentlyDeletedIds.pop(); // Pop from LIFO Stack
-    
-    QSqlQuery query;
-    query.prepare("UPDATE students SET status='Active' WHERE id=:id");
-    query.bindValue(":id", idToRestore);
     return query.exec();
 }
 
 bool StudentManager::hardDeleteStudent(int id) {
+    // 1. Fetch student before deletion
+    Student s = getStudentById(id);
+    if (s.id == -1) return false;
+    
+    // 2. Push to stack for undo feature
+    QVector<Student> batch; batch.push_back(s);
+    undoStack.push(batch);
+    
+    // 3. Delete from DB
     QSqlQuery query;
     query.prepare("DELETE FROM students WHERE id=:id");
     query.bindValue(":id", id);
     return query.exec();
+}
+
+bool StudentManager::undoLastDelete() {
+    if (undoStack.isEmpty()) return false;
+    
+    QVector<Student> batch = undoStack.pop(); // Pop from LIFO Stack
+    bool success = true;
+    
+    for (const Student& s : batch) {
+        QSqlQuery query;
+        query.prepare("INSERT INTO students (id, fullName, gender, date_of_birth, grade_id, section_id, stream_id, phone, email, status) "
+                      "VALUES (:id, :name, :gender, :dob, :grade, :section, :stream, :phone, :email, :status)");
+        query.bindValue(":id", s.id);
+        query.bindValue(":name", s.fullName);
+        query.bindValue(":gender", s.gender);
+        query.bindValue(":dob", s.dateOfBirth);
+        query.bindValue(":grade", s.grade_id);
+        query.bindValue(":section", s.section_id);
+        query.bindValue(":stream", s.stream_id > 0 ? QVariant(s.stream_id) : QVariant(QVariant::Int));
+        query.bindValue(":phone", s.phone);
+        query.bindValue(":email", s.email);
+        query.bindValue(":status", s.status);
+        if (!query.exec()) success = false;
+    }
+    
+    return success;
 }
 
 void StudentManager::bulkSoftDelete(const QVector<int> &ids) {
@@ -130,13 +150,24 @@ void StudentManager::bulkSoftDelete(const QVector<int> &ids) {
     query.prepare("UPDATE students SET status='Inactive' WHERE id=:id");
     for (int id : ids) {
         query.bindValue(":id", id);
-        if (query.exec()) {
-            recentlyDeletedIds.push(id); // Push to Stack for Undo feature
-        }
+        query.exec();
     }
 }
 
 void StudentManager::bulkHardDelete(const QVector<int> &ids) {
+    // 1. Fetch students before deletion
+    QVector<Student> batch;
+    for (int id : ids) {
+        Student s = getStudentById(id);
+        if (s.id != -1) batch.push_back(s);
+    }
+    
+    // 2. Push to stack for undo feature
+    if (!batch.isEmpty()) {
+        undoStack.push(batch);
+    }
+
+    // 3. Delete from DB
     QSqlQuery query;
     query.prepare("DELETE FROM students WHERE id=:id");
     for (int id : ids) {

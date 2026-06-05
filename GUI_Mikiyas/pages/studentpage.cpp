@@ -118,13 +118,6 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent)
     bulkDeleteBtn->setCursor(Qt::PointingHandCursor);
     bulkLayout->addWidget(bulkDeleteBtn);
 
-    QPushButton *bulkClassBtn = new QPushButton("Assign Class");
-    bulkClassBtn->setObjectName("secondaryButton");
-    bulkClassBtn->setStyleSheet(
-        "QPushButton { background-color: #1f4068; padding: 6px 14px; }"
-        "QPushButton:hover { background-color: #2a5a8c; }");
-    bulkClassBtn->setCursor(Qt::PointingHandCursor);
-    bulkLayout->addWidget(bulkClassBtn);
     bulkLayout->addStretch();
 
     bulkBar->setVisible(false);
@@ -165,7 +158,6 @@ StudentPage::StudentPage(const QString &role, int id, QWidget *parent)
     connect(sortCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &StudentPage::onSortChanged);
     connect(bulkDeleteBtn, &QPushButton::clicked, this, &StudentPage::onBulkDelete);
-    connect(bulkClassBtn,  &QPushButton::clicked, this, &StudentPage::onBulkAssignClass);
     connect(table, &QTableWidget::cellDoubleClicked, this, &StudentPage::onRowDoubleClicked);
 
     refreshTable();
@@ -359,9 +351,9 @@ void StudentPage::onDeleteStudent() {
     if (row < 0) { QMessageBox::warning(this, "Error", "Select a student."); return; }
     int id = table->item(row, 1)->text().toInt();
     if (QMessageBox::question(this, "Confirm Delete",
-        "This will deactivate student ID " + QString::number(id) + ".\n\nProceed?",
+        "This will permanently delete student ID " + QString::number(id) + " from the database.\n\nProceed?",
         QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-        manager.softDeleteStudent(id); // Use soft delete to enable Stack-based Undo
+        manager.hardDeleteStudent(id); // Use hard delete, stack will save for Undo
         refreshTable();
     }
 }
@@ -372,21 +364,8 @@ void StudentPage::onBulkDelete() {
     QVector<int> ids = getCheckedIds();
     if (ids.isEmpty()) return;
     if (QMessageBox::question(this, "Bulk Delete",
-        "Deactivate " + QString::number(ids.size()) + " student(s)?") == QMessageBox::Yes) {
-        manager.bulkSoftDelete(ids); // Use soft delete to enable Stack-based Undo
-        refreshTable();
-    }
-}
-
-void StudentPage::onBulkAssignClass() {
-    QVector<int> ids = getCheckedIds();
-    if (ids.isEmpty()) return;
-    bool ok;
-    QString cls = QInputDialog::getText(this, "Assign Class",
-        "Enter class for " + QString::number(ids.size()) + " student(s):",
-        QLineEdit::Normal, "", &ok);
-    if (ok && !cls.isEmpty()) {
-        manager.bulkAssignClass(ids, cls); // This now uses our custom FIFO Queue internally
+        "Permanently delete " + QString::number(ids.size()) + " student(s) from the database?") == QMessageBox::Yes) {
+        manager.bulkHardDelete(ids); // Use hard delete, stack will save for Undo
         refreshTable();
     }
 }

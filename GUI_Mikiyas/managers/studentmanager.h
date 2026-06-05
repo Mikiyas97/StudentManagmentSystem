@@ -60,8 +60,8 @@ private:
     SortField currentSortField = ById;
     bool currentSortAscending = true;
     
-    // Stack to track recently deleted students for the Undo feature
-    Stack<int> recentlyDeletedIds;
+    // Stack to track recently deleted students (full records) for the Undo feature
+    Stack<QVector<Student>> undoStack;
     
     // Linked list data loading — loads all students from DB into LinkedList
     LinkedList<Student> loadStudentsAsLinkedList(int teacherId = -1) const;

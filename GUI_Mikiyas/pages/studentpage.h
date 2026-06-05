@@ -23,7 +23,6 @@ private slots:
     void onViewStudent();
     void onDeleteStudent();
     void onBulkDelete();
-    void onBulkAssignClass();
     void onUndoDelete();
     void onSearch();
     void onSortChanged(int index);
