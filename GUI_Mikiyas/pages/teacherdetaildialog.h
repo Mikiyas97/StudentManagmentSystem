@@ -7,7 +7,7 @@
 class TeacherDetailDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit TeacherDetailDialog(const Teacher &t, QWidget *parent = nullptr);
+    explicit TeacherDetailDialog(const Teacher &t, const QString &userRole, QWidget *parent = nullptr);
 };
 
 #endif // TEACHERDETAILDIALOG_H

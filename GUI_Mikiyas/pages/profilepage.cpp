@@ -137,3 +137,8 @@ void ProfilePage::setupAdminProfile() {
     details["Role"] = "System Administrator";
     mainLayout->addWidget(createInfoGroup("Admin Information", details));
 }
+
+void ProfilePage::refreshTable() {
+    // Empty stub to suppress QMetaObject::invokeMethod warnings.
+    // The profile page is mostly static and doesn't need to refresh its tables on every tab switch.
+}

@@ -267,7 +267,7 @@ void StudentPage::refreshTable() {
         connect(viewBtn, &QPushButton::clicked, this, [this, sid]() {
             Student st = manager.getStudentById(sid);
             if (st.id == -1) return;
-            StudentDetailDialog dlg(st, this);
+            StudentDetailDialog dlg(st, userRole, this);
             connect(&dlg, &StudentDetailDialog::editRequested, this, &StudentPage::editStudentById);
             dlg.exec();
         });
@@ -339,7 +339,7 @@ void StudentPage::onViewStudent() {
     int id = table->item(row, 1)->text().toInt();
     Student s = manager.getStudentById(id);
     if (s.id == -1) return;
-    StudentDetailDialog dlg(s, this);
+    StudentDetailDialog dlg(s, userRole, this);
     connect(&dlg, &StudentDetailDialog::editRequested, this, &StudentPage::editStudentById);
     dlg.exec();
 }
@@ -417,7 +417,7 @@ void StudentPage::onRowDoubleClicked(int row, int /*column*/) {
     int id = table->item(row, 1)->text().toInt();
     Student s = manager.getStudentById(id);
     if (s.id == -1) return;
-    StudentDetailDialog dlg(s, this);
+    StudentDetailDialog dlg(s, userRole, this);
     connect(&dlg, &StudentDetailDialog::editRequested, this, &StudentPage::editStudentById);
     dlg.exec();
 }

@@ -12,6 +12,9 @@ class ProfilePage : public QWidget {
 public:
     explicit ProfilePage(const QString &role, int id, QWidget *parent = nullptr);
 
+public slots:
+    void refreshTable();
+
 private:
     void setupAdminProfile();
     void setupTeacherProfile(int id);

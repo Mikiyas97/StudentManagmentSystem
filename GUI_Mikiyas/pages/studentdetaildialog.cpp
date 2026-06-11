@@ -6,6 +6,8 @@
 #include <QGroupBox>
 #include <QFormLayout>
 #include <QFrame>
+#include <QMessageBox>
+#include "../managers/usermanager.h"
 
 #include <QTableWidget>
 #include <QHeaderView>
@@ -23,7 +25,7 @@ static QLabel* makeFieldLabel(const QString &text) {
     return lbl;
 }
 
-StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
+StudentDetailDialog::StudentDetailDialog(const Student &s, const QString &userRole, QWidget *parent)
     : QDialog(parent), student(s)
 {
     setWindowTitle("Student Details — " + s.fullName);
@@ -108,7 +110,34 @@ StudentDetailDialog::StudentDetailDialog(const Student &s, QWidget *parent)
     QHBoxLayout *btnRow = new QHBoxLayout;
     btnRow->addStretch();
 
+    if (userRole == "admin") {
+        QPushButton *resetPassBtn = new QPushButton("Reset Password");
+        resetPassBtn->setCursor(Qt::PointingHandCursor);
+        resetPassBtn->setStyleSheet(
+            "QPushButton { background: #c0392b; color: white; border-radius: 4px; padding: 6px 12px; }"
+            "QPushButton:hover { background: #a93226; }");
+        btnRow->addWidget(resetPassBtn);
+        
+        connect(resetPassBtn, &QPushButton::clicked, this, [this]() {
+            if (QMessageBox::question(this, "Reset Password", 
+                "Are you sure you want to reset this student's password to the default ('pass" + QString::number(student.id) + "')?\n\nThis action cannot be undone.",
+                QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+                
+                UserManager um;
+                if (um.changePassword(QString::number(student.id), "pass" + QString::number(student.id))) {
+                    QMessageBox::information(this, "Success", "Password reset successfully.");
+                } else {
+                    QMessageBox::warning(this, "Error", "Failed to reset password.");
+                }
+            }
+        });
+    }
+
     QPushButton *editBtn = new QPushButton("Edit Student");
+    editBtn->setCursor(Qt::PointingHandCursor);
+    editBtn->setStyleSheet(
+        "QPushButton { background: #1f4068; color: white; border-radius: 4px; padding: 6px 12px; }"
+        "QPushButton:hover { background: #2a5a8c; }");
     connect(editBtn, &QPushButton::clicked, this, [this]() {
         emit editRequested(student.id);
         accept();

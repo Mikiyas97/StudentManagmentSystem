@@ -9,7 +9,7 @@
 class StudentDetailDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit StudentDetailDialog(const Student &s, QWidget *parent = nullptr);
+    explicit StudentDetailDialog(const Student &s, const QString &userRole, QWidget *parent = nullptr);
 
 signals:
     void editRequested(int studentId);

@@ -185,11 +185,11 @@ void TeacherPage::onSortChanged(int /*index*/) { refreshTable(); }
 void TeacherPage::onSearch() { refreshTable(); }
 
 void TeacherPage::onViewTeacher(int id) {
-  Teacher t = manager.getTeacherById(id);
-  if (t.id != -1) {
-    TeacherDetailDialog dialog(t, this);
-    dialog.exec();
-  }
+    Teacher t = manager.getTeacherById(id);
+    if (t.id != -1) {
+        TeacherDetailDialog dialog(t, "admin", this);
+        dialog.exec();
+    }
 }
 
 void TeacherPage::onEditTeacher(int /*id*/) {
