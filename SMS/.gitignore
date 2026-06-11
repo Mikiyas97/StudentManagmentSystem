@@ -1,0 +1,19 @@
+# Qt Creator / Build
+build/
+release/
+debug/
+*.o
+*.exe
+*.idx
+*.user
+*.cache
+Makefile*
+object_script.*
+ui_*.h
+moc_*.cpp
+*.moc
+qmake_qmake_all.qrc
+
+# OS
+Thumbs.db
+.DS_Store
